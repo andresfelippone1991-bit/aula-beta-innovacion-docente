@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { ResourceRequestModal } from './ResourceRequestModal';
 
 const CATEGORIES = [
   {
@@ -27,8 +29,14 @@ const CATEGORIES = [
 ];
 
 export const ResourceBank: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="py-24 bg-white dark:bg-background-dark">
+      <ResourceRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
@@ -62,7 +70,10 @@ export const ResourceBank: React.FC = () => {
             <h3 className="text-2xl font-bold mb-2 dark:text-white">¿Buscas algo específico?</h3>
             <p className="text-slate-600 dark:text-slate-400">Solicita un recurso a nuestra comunidad y lo diseñaremos por ti.</p>
           </div>
-          <button className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg hover:shadow-primary/30 active:scale-95">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg hover:shadow-primary/30 active:scale-95"
+          >
             Solicitar Recurso
           </button>
         </div>
