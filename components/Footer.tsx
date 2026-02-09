@@ -1,7 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 export const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = encodeURIComponent('Suscripcion');
+    const body = encodeURIComponent(email);
+    window.location.href = `mailto:aula.beta1@gmail.com?subject=${subject}&body=${body}`;
+    setEmail('');
+  };
+
   return (
     <footer className="bg-navy-950 text-slate-300 pt-20 pb-10 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,11 +62,14 @@ export const Footer: React.FC = () => {
           <div className="md:col-span-2">
             <h4 className="text-white font-bold mb-6 text-lg">Innovación Semanal</h4>
             <p className="mb-6">Recibe un tip de IA y un recurso gratis cada lunes.</p>
-            <form className="flex flex-col sm:flex-row gap-2" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col sm:flex-row gap-2" onSubmit={handleSubscribe}>
               <input
                 className="flex-1 bg-slate-900 border-slate-700 rounded-xl px-4 py-3 focus:ring-primary focus:border-primary text-white"
                 placeholder="tu@email.com"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <button className="bg-primary hover:bg-blue-600 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md active:scale-95">
                 Suscribirme
