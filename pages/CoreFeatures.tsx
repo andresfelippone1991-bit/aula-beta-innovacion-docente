@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { CommandCenterModal } from '../components/CommandCenterModal';
 
 export const CoreFeatures: React.FC = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     return (
         <section className="bg-[#0B1120] py-24 sm:py-32 min-h-screen">
+            <CommandCenterModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
 
                 <div className="mx-auto max-w-2xl text-center mb-16">
@@ -13,6 +20,14 @@ export const CoreFeatures: React.FC = () => {
                     <p className="mt-6 text-lg leading-8 text-gray-400">
                         Nuestra plataforma unifica las herramientas dispersas en un flujo de trabajo coherente, diseñado específicamente para la realidad escolar.
                     </p>
+                    <div className="mt-10 flex items-center justify-center gap-x-6">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold text-lg transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+                        >
+                            Obtener Centro de Comando
+                        </button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
