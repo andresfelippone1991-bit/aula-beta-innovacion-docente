@@ -1,0 +1,961 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>La Encrucijada - 1943</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+
+        body {
+            background-color: #1c1917;
+            /* Stone 900 */
+            color: #e7e5e4;
+            /* Stone 200 */
+            font-family: 'Merriweather', serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1,
+        h2,
+        .typewriter {
+            font-family: 'Special+Elite', cursive;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Animación de la barra de tiempo --- */
+        @keyframes shrink {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        /* Custom scrollbar for immersive feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #292524;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #44403c;
+            border-radius: 4px;
+        }
+
+        .choice-btn {
+            transition: all 0.2s ease;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.98);
+            background-color: #44403c;
+        }
+
+        /* Estilo para inputs */
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Avatar selection styles */
+        .avatar-option {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            opacity: 0.6;
+            filter: grayscale(100%);
+        }
+
+        .avatar-option.selected {
+            border-color: #b45309;
+            /* Amber 700 */
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(180, 83, 9, 0.4);
+        }
+
+        .stamp-font {
+            font-family: 'Special Elite', cursive;
+            transform: rotate(-12deg);
+        }
+    </style>
+</head>
+
+<body class="h-screen w-full flex flex-col overflow-hidden bg-stone-950">
+
+    <!-- Header -->
+    <header
+        class="w-full bg-stone-900 border-b border-stone-800 p-4 shadow-md z-10 flex justify-between items-center shrink-0 h-16">
+        <div>
+            <h1 class="text-lg md:text-2xl text-amber-700 tracking-widest uppercase font-bold">La Encrucijada</h1>
+            <p class="text-[10px] md:text-xs text-stone-500">Francia Ocupada, 1943</p>
+        </div>
+        <!-- Contenedor del estado del jugador (Avatar + Nombre) -->
+        <div id="status-display" class="hidden text-xs text-stone-400 text-right fade-in">
+            <!-- Imagen del avatar (se llenará con JS) -->
+            <img id="header-avatar-img" src=""
+                class="w-10 h-10 rounded-full border-2 border-stone-600 mr-3 object-cover shadow-md">
+            <div class="flex flex-col items-end">
+                <span id="player-display-name" class="block font-bold text-amber-600/80 text-sm"></span>
+                <span class="italic text-[10px]">Civil</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="game-container" class="flex-grow overflow-y-auto p-6 max-w-2xl mx-auto w-full relative scroll-smooth">
+        <!-- Contenedor del temporizador (se llenará con JS) -->
+        <div id="timer-container" class="h-6 w-full mb-4 sticky top-0 z-30"></div>
+
+        <!-- Content will be injected here via JS -->
+        <div id="scene-content" class="pb-24">
+            <!-- Dynamic Scene Text -->
+        </div>
+    </main>
+
+    <!-- Bottom Controls / Choices -->
+    <footer id="choices-container"
+        class="w-full bg-stone-900 border-t border-stone-800 p-4 shrink-0 z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]">
+        <div id="choices-wrapper" class="max-w-2xl mx-auto flex flex-col gap-3 min-h-[60px] justify-center">
+            <!-- Dynamic Buttons -->
+        </div>
+    </footer>
+
+    <script>
+        // --- Game State ---
+        const state = {
+            name: "",
+            gender: "", // 'M' or 'F'
+            avatarUrl: "", // URL de la imagen seleccionada
+            currentScene: "title",
+            timerId: null // Para guardar la referencia del temporizador
+        };
+
+        // --- Helper Functions for Gendered Text ---
+        function getTerm(masculine, feminine) {
+            return state.gender === 'F' ? feminine : masculine;
+        }
+
+        function formatText(text) {
+            // Ensure text is defined
+            if (!text) return "";
+
+            return text
+                .replace(/{name}/g, `<span class="text-amber-500 font-bold">${state.name}</span>`)
+                .replace(/{hijo\/a}/g, getTerm("hijo", "hija"))
+                .replace(/{el\/la}/g, getTerm("el", "la"))
+                .replace(/{chico\/a}/g, getTerm("chico", "chica"))
+                .replace(/{tonto\/a}/g, getTerm("tonto", "tonta"))
+                .replace(/{solo\/a}/g, getTerm("solo", "sola"))
+                .replace(/{un\/una}/g, getTerm("un", "una"))
+                .replace(/{invitado\/a}/g, getTerm("invitado", "invitada"))
+                .replace(/{avatar}/g, state.avatarUrl); // Reemplaza el placeholder del avatar
+        }
+
+        // --- Scene Database ---
+        const scenes = {
+            // --- 1. Title Screen ---
+            "title": {
+                text: `
+                    <div class="flex flex-col items-center justify-center h-full mt-10 fade-in">
+                        <div class="text-8xl mb-6 filter grayscale opacity-80 drop-shadow-lg">🇫🇷</div>
+                        <h1 class="text-4xl md:text-5xl text-amber-700 font-bold text-center mb-2 tracking-tighter border-b-2 border-stone-800 pb-6 w-full">LA ENCRUCIJADA</h1>
+                        <p class="text-stone-500 text-center uppercase tracking-widest text-sm mb-12">Una historia interactiva sobre la Ocupación</p>
+                        
+                        <p class="text-stone-400 text-center max-w-md italic mb-8">
+                            "En la guerra, la primera baja es la inocencia. La segunda, a menudo, es la verdad."
+                        </p>
+
+                        <button onclick="loadScene('character_creation')" class="w-full max-w-xs bg-stone-800 hover:bg-stone-700 text-amber-500 border border-amber-900/50 font-bold py-4 px-6 rounded shadow-lg transition transform hover:scale-105 uppercase tracking-wider">
+                            Nueva Historia
+                        </button>
+                    </div>
+                `,
+                type: "static" // No standard footer choices
+            },
+
+            // --- 2. Character Creation (ID Card) ---
+            "character_creation": {
+                text: `
+                    <div class="fade-in max-w-md mx-auto">
+                        <div class="bg-[#e8e4d9] text-stone-900 p-6 rounded shadow-2xl rotate-1 relative overflow-hidden">
+                            <!-- Background Texture Effect -->
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] opacity-50 pointer-events-none"></div>
+                            
+                            <!-- Header ID Card -->
+                            <div class="border-b-2 border-stone-800 pb-2 mb-4 flex justify-between items-end">
+                                <div>
+                                    <h3 class="font-bold text-xl uppercase tracking-tighter leading-none">RÉPUBLIQUE FRANÇAISE</h3>
+                                    <p class="text-[10px] font-bold uppercase">Carte d'Identité</p>
+                                </div>
+                                <div class="text-xs font-mono">Nº 1943-B</div>
+                            </div>
+
+                            <!-- Photo Area (Full Width) -->
+                            <div class="mb-4">
+                                <p class="text-[10px] font-bold uppercase text-center mb-2">Photographie</p>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <!-- Option 1: Male -->
+                                    <div onclick="setAvatar('M', 'https://files.catbox.moe/7wj3bx.webp')" id="avatar-1" class="avatar-option cursor-pointer bg-stone-300 h-32 w-full rounded border-stone-400 overflow-hidden">
+                                        <img src="https://files.catbox.moe/7wj3bx.webp" alt="Hombre" class="w-full h-full object-cover object-center" onerror="this.src='https://placehold.co/100x120/333/666?text=Foto+1'">
+                                    </div>
+                                    <!-- Option 2: Female -->
+                                    <div onclick="setAvatar('F', 'https://files.catbox.moe/iwmjq3.webp')" id="avatar-2" class="avatar-option cursor-pointer bg-stone-300 h-32 w-full rounded border-stone-400 overflow-hidden">
+                                        <img src="https://files.catbox.moe/iwmjq3.webp" alt="Mujer 1" class="w-full h-full object-cover object-center" onerror="this.src='https://placehold.co/100x120/333/666?text=Foto+2'">
+                                    </div>
+                                    <!-- Option 3: Female -->
+                                    <div onclick="setAvatar('F', 'https://files.catbox.moe/85tmzo.webp')" id="avatar-3" class="avatar-option cursor-pointer bg-stone-300 h-32 w-full rounded border-stone-400 overflow-hidden">
+                                        <img src="https://files.catbox.moe/85tmzo.webp" alt="Mujer 2" class="w-full h-full object-cover object-center" onerror="this.src='https://placehold.co/100x120/333/666?text=Foto+3'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Info Area (Full Width) -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase mb-1">Nom et Prénoms</label>
+                                    <input type="text" id="input-name" class="w-full bg-transparent border-b-2 border-stone-400 font-mono text-lg focus:outline-none focus:border-stone-900 p-1 uppercase placeholder-stone-400/50" placeholder="Escribí tu nombre..." autocomplete="off">
+                                </div>
+                                
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase mb-1">Nationalité</p>
+                                    <p class="font-mono text-sm border-b border-stone-300 pb-1">Française</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase mb-1">Profession</p>
+                                    <p class="font-mono text-sm border-b border-stone-300 pb-1">Boulangerie (Panadería)</p>
+                                </div>
+                            </div>
+
+                            <!-- Footer Stamp -->
+                            <div class="relative h-16 mt-4">
+                                <div class="absolute right-0 bottom-0 stamp-font text-red-700/60 border-4 border-red-700/60 p-2 text-xl font-bold rounded uppercase">
+                                    Validé 1943
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="validation-msg" class="text-center mt-6 text-red-400 text-sm h-6 opacity-0 transition-opacity">
+                            Complete su documentación para continuar.
+                        </div>
+                    </div>
+                `,
+                type: "input", // Logic handled by checkInput
+                next: "prologue"
+            },
+
+            // --- Story Start ---
+            "prologue": {
+                text: `
+                    <p class="mb-4 text-amber-700 uppercase tracking-widest text-xs font-bold">Inicio</p>
+                    <p class="mb-4 text-lg">Tenés 19 años. Vivís en un pequeño pueblo a las afueras de París con tus padres ancianos. La vida bajo la ocupación alemana es dura: el miedo es constante y la comida escasea.</p>
+                    <p>Intentás mantener un perfil bajo, trabajando en la panadería de la familia. Pero esta noche, la guerra ha llamado a tu puerta trasera.</p>
+                    <div class="my-8 flex items-center justify-center opacity-50">
+                        <span class="h-px w-16 bg-stone-600"></span>
+                        <span class="mx-2 text-xl">⚡</span>
+                        <span class="h-px w-16 bg-stone-600"></span>
+                    </div>
+                    <p class="italic text-stone-500 mb-2">Medianoche. Tormenta.</p>
+                    <p class="mt-4">Escuchás tres golpes secos. Al abrir, un hombre empapado con uniforme destrozado cae contra el marco. Sangra.</p>
+                    
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-900 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/g1t340.webp" class="w-20 h-24 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-amber-500 text-lg">Aviador Americano</h3>
+                            <p class="text-stone-300 italic font-mono text-sm">"Ayuda... por favor. Soy... aviador. Americano."</p>
+                        </div>
+                    </div>
+
+                    <!-- AUDIO AÑADIDO (Ya estaba, verificado) -->
+                    <audio controls class="w-full mt-4" preload="auto" style="height: 30px;">
+                        <source src="https://files.catbox.moe/pamh4y.mp3" type="audio/mpeg">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+
+                    <p class="mt-4">Si lo ayudás, arriesgás a todos. Si lo dejás, morirá.</p>
+                `,
+                choices: [
+                    { text: "Ayudarlo (Meterlo en casa)", next: "scene_2_entry", style: "default" },
+                    { text: "Rechazarlo (Cerrar la puerta)", next: "ending_tragic_refusal", style: "danger" }
+                ]
+            },
+
+            // --- Main Path ---
+            "scene_2_entry": {
+                // ESTA ESCENA INICIA EL TEMPORIZADOR
+                text: `
+                    <p>Con el corazón en la boca, lo arrastrás adentro. Pesa mucho. El cerrojo resuena como un disparo.</p>
+                    <p class="mt-4">De repente, un crujido arriba. <strong class="text-stone-200">Tu padre se ha despertado.</strong></p>
+                    <p class="mt-2">Y peor aún: afuera, los ladridos de los perros se acercan. <em class="text-amber-600">La patrulla alemana está en tu calle.</em></p>
+                    <p class="mt-6 text-red-400 font-bold text-center animate-pulse">¡TENÉS SEGUNDOS!</p>
+                `,
+                choices: [
+                    { text: "Al Sótano (Rápido pero obvio)", next: "scene_3a_basement", style: "default" },
+                    { text: "Al Taller (Entre la harina)", next: "scene_3b_workshop", style: "default" }
+                ]
+            },
+
+            // --- Branch A: Basement (Fail Path) ---
+            "scene_3a_basement": {
+                text: `
+                    <p>Lo empujás al sótano y cerrás la trampilla justo cuando golpean la puerta principal.</p>
+                    
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/z4j7i0.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-red-500 text-lg">Oficial Klemper</h3>
+                            <p class="text-stone-300 italic">"Buscamos a un terrorista. Oímos ruidos aquí."</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/0t1ufc.mp3" type="audio/mpeg"></audio>
+                        </div>
+                    </div>
+
+                    <p class="mt-4">El oficial pasea por la cocina. Tus padres están aterrorizados. Se detiene sobre la alfombra que pusiste sobre la trampilla. Sonríe fríamente.</p>
+                    <p class="mt-2 text-red-400">"Qué lugar tan curioso para una alfombra..."</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/k3wb70.mp3" type="audio/mpeg"></audio>
+                `,
+                choices: [
+                    { text: "Mentir ('¡Hay muchas ratas ahí!')", next: "ending_basement", style: "default" },
+                    { text: "Suplicar ('No lo abra, por favor')", next: "ending_basement", style: "danger" }
+                ]
+            },
+
+            // --- Branch B: Workshop (Success Path) ---
+            "scene_3b_workshop": {
+                text: `
+                    <p>Lo arrastrás al taller entre los sacos de harina. Pero dejaste un rastro de sangre y agua.</p>
+                    <p class="mt-4">Tu padre baja. Ve el rastro. Reacciona al instante: rompe un saco de harina y lo vuelca sobre la sangre.</p> 
+                    <p class="mt-2"><em class="text-stone-300">"¡Torpe!"</em> te grita fingiendo, justo cuando entra Klemper.</p>
+
+                    <div class="my-4 p-4 bg-stone-800/50 border border-stone-700 rounded-lg space-y-4">
+                        <div class="flex items-start gap-4">
+                            <img src="https://files.catbox.moe/3l1avj.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-amber-500 text-lg">Tu Padre</h3>
+                                <p class="text-stone-300 italic">"Disculpe, Herr Offizier. Mi {hijo/a} es {un/una} inútil. Tiró toda la harina".</p>
+                                <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/ijsf9q.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-grow text-right">
+                                <h3 class="font-bold text-red-500 text-lg">Oficial Klemper</h3>
+                                <p class="text-stone-300 italic">"Si esconden a alguien, los fusilaré a todos."</p>
+                                <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/vyc03e.mp3" type="audio/mpeg"></audio>
+                            </div>
+                            <img src="https://files.catbox.moe/z4j7i0.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4">Klemper te clava la mirada.</p>
+                `,
+                choices: [
+                    { text: "Seguir la corriente ('Soy muy torpe, perdón')", next: "scene_4_morning", style: "default" },
+                    { text: "Quedarse callado/a del miedo", next: "ending_collab_suspicion", style: "danger" },
+                    { text: "Exagerar ('¡Yo mismo lo entregaría!')", next: "ending_collab_suspicion", style: "danger" }
+                ]
+            },
+
+            // --- Scene 4: The Medicine ---
+            "scene_4_morning": {
+                text: `
+                    <p class="text-green-700 text-xs uppercase tracking-widest font-bold mb-2">Sobreviviste a la noche</p>
+                    <p>Klemper se va, pero promete volver.</p>
+                    
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/g1t340.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-amber-500 text-lg">Tom (El Aviador)</h3>
+                            <p class="text-stone-300">A la mañana, lo ves bien. Es joven, se llama 'Tom'. Su pierna está terrible. <strong class="text-red-400">Gangrena.</strong> Huele a infección. Morirá sin antibióticos.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <div class="flex-grow text-right">
+                            <h3 class="font-bold text-amber-500 text-lg">Tu Madre</h3>
+                            <p class="text-stone-300 italic">"¡Nos van a matar a todos! ¡Sáquenlo de aquí! ¡Ahora!"</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/ztubxo.mp3" type="audio/mpeg"></audio>
+                        </div>
+                        <img src="https://files.catbox.moe/4m52hr.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                    </div>
+
+                    <p class="mt-4">Tu padre sabe que no pueden ir al hospital. Necesitás medicina, YA.</p>
+                `,
+                choices: [
+                    { text: "Ir al Farmacéutico (M. Renard - Colaboracionista)", next: "ending_renard", style: "danger" },
+                    { text: "Ir a la Maestra (Mme. Perrault - Posible aliada)", next: "scene_5_teacher", style: "highlight" }
+                ]
+            },
+
+            // --- Scene 5: The Teacher ---
+            "scene_5_teacher": {
+                text: `
+                    <p>Vas a casa de Madame Perrault. Es una anciana de aspecto frágil, pero sus ojos son afilados.</p>
+                    
+                    <div class="my-4 p-4 bg-stone-800/50 border border-stone-700 rounded-lg space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-grow text-right">
+                                <h3 class="font-bold text-amber-500 text-lg">{name}</h3>
+                                <p class="text-stone-300 italic">"Madame, necesito ayuda. Mi... primo. Está enfermo. Infección grave."</p>
+                            </div>
+                            <img src="{avatar}" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <img src="https://files.catbox.moe/h67bko.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-amber-500 text-lg">Madame Perrault</h3>
+                                <p class="text-stone-300 italic">"Ah, 'cazando', supongo. ¿Y ese 'primo' tuyo cayó del cielo?"</p>
+                                <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/grtbvg.mp3" type="audio/mpeg"></audio>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 text-amber-500 font-bold text-center text-xl">Ella lo sabe.</p>
+                `,
+                choices: [
+                    { text: "Negarlo todo y huir", next: "ending_coward", style: "default" },
+                    { text: "Confiar en ella ('Sí, y se muere')", next: "scene_5b_return_home", style: "highlight" }
+                ]
+            },
+
+            // --- NUEVA ESCENA 1: INTERACCIÓN FAMILIAR ---
+            "scene_5b_return_home": {
+                text: `
+                    <p>Volvés a casa corriendo, con la sulfamida escondida. Subís al taller. Tom está ardiendo en fiebre. Le das la medicina y un trago de agua. Él apenas puede agradecer.</p>
+                    <p class-"mt-4">Cuando bajás, tu madre te intercepta. Sus ojos están hinchados de llorar.</p>
+
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <div class="flex-grow text-right">
+                            <h3 class="font-bold text-amber-500 text-lg">Tu Madre</h3>
+                            <p class="text-stone-300 italic">"¡{name}, no podemos más! ¡Ese hombre nos va a matar a todos! ¡Klemper dijo que volvería! ¡Sácalo de aquí, te lo ruego!"</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/2tyuxu.mp3" type="audio/mpeg"></audio>
+                        </div>
+                        <img src="https://files.catbox.moe/4m52hr.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/3l1avj.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-amber-500 text-lg">Tu Padre</h3>
+                            <p class="text-stone-300 italic">"¡Elise, ya basta! {El/La} {chico/a} está haciendo lo que puede. Pero tu madre tiene razón en una cosa, {name}. Esto no puede durar. ¿Cuál es el plan ahora?"</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/y2n3y5.mp3" type="audio/mpeg"></audio>
+                        </div>
+                    </div>
+                `,
+                choices: [
+                    { text: "Tengo un plan. Confíen en mí.", next: "scene_5c_klemper_returns", style: "default" },
+                    { text: "¡No sé qué hacer! Solo sé que no podía dejarlo morir.", next: "scene_5c_klemper_returns", style: "default" }
+                ]
+            },
+
+            // --- NUEVA ESCENA 2: EL OFICIAL PRESENTE ---
+            "scene_5c_klemper_returns": {
+                text: `
+                    <p>Justo cuando tu padre va a responder, suenan dos golpes *ligeros* y *educados* en la puerta principal. No es una patrulla, es peor.</p>
+                    <p class="mt-4">Es Klemper. Solo. Tiene una botella de vino en la mano.</p>
+
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/z4j7i0.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-red-500 text-lg">Oficial Klemper</h3>
+                            <p class="text-stone-300 italic">"Buenas tardes. Vengo a disculparme por el desorden de anoche. Y a agradecerles. Aunque, pensándolo bien, fue un desperdicio de harina muy... *extraño*, ¿no cree?"</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/r9aq0u.mp3" type="audio/mpeg"></audio>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-4">Te mira. Sus ojos no sonríen. Está pescando. Sabe que mentían. Te está dando una última oportunidad para delatarte.</p>
+                `,
+                choices: [
+                    { text: "(Mentir) 'Fui {tonto/a}, señor. Mi padre me castigó bien.'", next: "scene_6_plan", style: "highlight" },
+                    { text: "(Desviar) '¿Encontró al aviador, Herr Offizier?'", next: "ending_klemper_suspicion_2", style: "danger" },
+                    { text: "(Silencio) Bajar la mirada y dejar que tu padre hable.", next: "ending_klemper_suspicion_2", style: "danger" }
+                ]
+            },
+
+
+            // --- Scene 6: The Plan ---
+            "scene_6_plan": {
+                text: `
+                    <p>Madame Perrault te contacta al anochecer, mucho después de que Klemper se fuera. "Has aguantado bien, {name}. Es hora de actuar."</p>
+                    <p class="mt-4">Una enlace de la Resistencia llega a tu casa. Se presenta como "Simone". El plan: sacar a Tom en un camión de verduras al amanecer.</p>
+                    
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/ck047z.png" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.src='https://placehold.co/100x120/333/666?text=Simone'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-amber-500 text-lg">Simone (Resistencia)</h3>
+                            <p class="text-stone-300 italic">"El camión está listo, pero Klemper está vigilando el mercado. Necesitamos una <strong>distracción</strong> para mover el camión sin registro."</p>
+                            <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/ld3mo3.mp3" type="audio/mpeg"></audio>
+                        </div>
+                    </div>
+                `,
+                choices: [
+                    { text: "Causar una explosión pequeña (Ruido y correr)", next: "scene_7a_explosion_prep", style: "danger" },
+                    { text: "Denuncia anónima al Farmacéutico Renard", next: "scene_7b_denounce_prep", style: "highlight" }
+                ]
+            },
+
+            // --- NUEVAS ESCENAS (RAMA EXPLOSIÓN) ---
+
+            "scene_7a_explosion_prep": {
+                text: `
+                    <p>"Una explosión..." dice Simone, frunciendo el ceño. "No tenemos explosivos de sobra, {name}. Tendrás que improvisar. ¿Cómo lo harás?"</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/waewl9.mp3" type="audio/mpeg"></audio>
+                `,
+                choices: [
+                    { text: "Usaré gasolina y químicos del depósito alemán.", next: "scene_8a_motor_pool", style: "danger" },
+                    { text: "Prenderé fuego el viejo granero de heno. Hará mucho humo.", next: "scene_8b_barn_fire", style: "default" }
+                ]
+            },
+
+            "scene_8a_motor_pool": {
+                text: `
+                    <p>Es la misión más arriesgada. Te deslizás entre las sombras hacia el depósito de combustible alemán. Hay dos guardias.</p>
+                    <p class="mt-4">Lográs llenar una lata con gasolina, pero al salir, pateás una piedra. Uno de los guardias se da vuelta.</p>
+                    <p class="mt-2 text-stone-300 italic">"¿Wer ist da?" (¿Quién está ahí?)</p>
+                    <p class="mt-4 text-red-400">Te está apuntando con su rifle.</p>
+                `,
+                choices: [
+                    { text: "Lanzar la lata y correr (Perder la misión)", next: "ending_motor_pool_fail", style: "danger" },
+                    { text: "Rendirse y esperar lo mejor", next: "ending_motor_pool_fail", style: "danger" }
+                ]
+            },
+
+            "scene_8b_barn_fire": {
+                text: `
+                    <p>Es una buena idea. El granero está abandonado y lleno de heno seco. Te escabullís y prendés fuego en una esquina.</p>
+                    <p class="mt-4">En segundos, las llamas crecen, ¡es una hoguera gigante! El humo negro y espeso llena el cielo. Oyes gritos y silbatos. ¡La distracción perfecta!</p>
+                    <p class="mt-4">Simone te da el visto bueno desde lejos. El camión se pone en marcha. Ahora... a escapar.</p>
+                `,
+                choices: [
+                    { text: "Correr a la iglesia (punto de encuentro)", next: "ending_hero", style: "default" },
+                    { text: "Esconderse en el río (lento pero seguro)", next: "ending_hero", style: "default" }
+                ]
+            },
+
+            // --- NUEVAS ESCENAS (RAMA DENUNCIA) ---
+
+            "scene_7b_denounce_prep": {
+                text: `
+                    <p>"Denunciar a Renard. Es astuto", dice Simone. "Usar al lobo para cazar al zorro. Pero Klemper es paranoico. ¿Cómo le hacés llegar la denuncia sin que te vean?"</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/93owdh.mp3" type="audio/mpeg"></audio>
+                    <div class="flex items-start gap-4 p-4 mt-4 bg-stone-800/50 border border-stone-700 rounded-lg">
+                        <img src="https://files.catbox.moe/4vj12c.webp" class="w-24 h-28 rounded object-cover border-2 border-stone-600 shrink-0 filter grayscale" onerror="this.style.display='none'">
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-amber-500 text-lg">Monsieur Renard</h3>
+                            <p class="text-stone-300">Es un hombre despreciado, pero con contactos. Acercarse a él o a la Gestapo es un riesgo.</p>
+                        </div>
+                    </div>
+                `,
+                choices: [
+                    { text: "Escribiré la nota. Yo mismo la deslizaré por la puerta.", next: "scene_8c_deliver_note", style: "default" },
+                    { text: "Usaré a Antoine, el niño de la calle. Le pagaré.", next: "scene_8d_use_antoine", style: "danger" }
+                ]
+            },
+
+            "scene_8c_deliver_note": {
+                text: `
+                    <p>Esperás a las 4 AM, la hora más oscura. La *Kommandantur* (oficina de Klemper) está en silencio.</p>
+                    <p class="mt-4">Llegás a la puerta. Es un pasillo oscuro. Tu corazón late tan fuerte que crees que despertará a los guardias. Deslizás la nota por debajo de la puerta.</p>
+                    <p class="mt-4">Hecho. Te vas sin ser visto. Ahora, a esperar al amanecer y ver si Klemper muerde el anzuelo.</p>
+                `,
+                choices: [
+                    { text: "Ver la reacción de Klemper (Continuar)", next: "scene_9_watch_klemper", style: "highlight" }
+                ]
+            },
+
+            "scene_8d_use_antoine": {
+                text: `
+                    <p>Encontrás a Antoine durmiendo en un callejón. Le das la nota y una moneda. "Solo déjala en la puerta, que nadie te vea". El niño asiente, asustado, y corre.</p>
+                    <p class="mt-4">Pasan 10 minutos. Una eternidad. El niño no vuelve. ¿Lo atraparon? ¿Te delatará?</p>
+                    <p class="mt-4 text-red-400">De repente, oyes un grito. Un soldado alemán arrastra a Antoine de la oreja. ¡Te ha visto! ¡Te señala!</p>
+                `,
+                choices: [
+                    { text: "Correr (Abandonar a Antoine)", next: "ending_antoine_fail", style: "danger" },
+                    { text: "Intentar ayudarlo (Rendirse)", next: "ending_antoine_fail", style: "danger" }
+                ]
+            },
+
+            "scene_9_watch_klemper": {
+                text: `
+                    <p>Es el amanecer. Te escondés en una ventana con vistas a la oficina y la farmacia.</p>
+                    <p class="mt-4">Ves a Klemper salir. Ve la nota. La lee. Su cara se pone roja de furia. ¡Mercado negro en su pueblo! Grita a sus hombres.</p>
+                    <p class="mt-4">"¡Klaus! ¡Hans! ¡Conmigo! ¡Vamos a arrestar a ese cerdo!"</p>
+                    <p class="mt-4 text-green-400">¡Funcionó! Klemper y sus hombres marchan hacia la farmacia. El mercado queda sin vigilancia. Le das la señal a Simone.</p>
+                `,
+                choices: [
+                    { text: "Ir a casa. El plan funcionó.", next: "ending_strategist", style: "highlight" }
+                ]
+            },
+
+
+            // --- ENDINGS ---
+
+            "ending_tragic_refusal": {
+                type: "ending",
+                title: "FINAL: EL PESO DEL MIEDO",
+                text: `
+                    <p>Cerrás la puerta. Oís al aviador golpear débilmente una vez más. Luego, silencio.</p>
+                    <p class="mt-4">A la mañana siguiente, ves a los soldados alemanes cargando un cuerpo cerca del río.</p>
+                    <p class="mt-4">Tu familia está a salvo. Pero cada vez que llueve, escuchás esos golpes en la puerta. El miedo te salvó la vida, pero te costó tu humanidad.</p>
+                `,
+                color: "text-stone-500"
+            },
+
+            "ending_basement": {
+                type: "ending",
+                title: "FIN DEL JUEGO: EL RASTRO",
+                text: `
+                    <p>Klemper te ignora por completo y de una patada abre la trampilla. Tom está ahí, demasiado débil para esconderse.</p>
+                    <p class="mt-4">"Vaya, vaya", dice el oficial. Saca su pistola.</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/eeqtc7.mp3" type="audio/mpeg"></audio>
+                    <p class="mt-4 text-red-400 font-bold">No hubo juicio. Solo una pared en el patio trasero.</p> 
+                    <p class="mt-2">Intentaste ayudar, pero en la guerra, las buenas intenciones sin astucia son mortales.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            "ending_collab_suspicion": {
+                type: "ending",
+                title: "FIN DEL JUEGO: LA SOSPECHA",
+                text: `
+                    <p>Tu actuación no convence a Klemper. Quizás fue el temblor en tu voz o la exageración.</p>
+                    <p class="mt-4">Ordena a sus hombres registrar el taller. Mueven los sacos de harina. Encuentran a Tom.</p>
+                    <p class="mt-4">Tu padre intenta detenerlos y recibe un culatazo. Todo ha terminado para tu familia.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            "ending_renard": {
+                type: "ending",
+                title: "FIN DEL JUEGO: EL DELATOR",
+                text: `
+                    <p>Monsieur Renard te vende las medicinas con una sonrisa amable. "Para tu primo, claro".</p>
+                    <p class="mt-4">Volvés a casa aliviado/a. Pero Renard no es solo un farmacéutico, es un informante pagado.</p>
+                    <p class="mt-4">Una hora después, la Gestapo rodea tu casa. Renard cobra su recompensa. Vos pagás el precio.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            "ending_coward": {
+                type: "ending",
+                title: "FINAL GRIS: LA INACCIÓN",
+                text: `
+                    <p>Huyes de casa de la maestra. Sin medicinas, Tom empeora. Muere dos días después en agonía.</p>
+                    <p class="mt-4">Enterrarlo en el sótano es una pesadilla. La guerra termina dos años después, pero el secreto pudre los cimientos de tu familia. Nadie habla de ello nunca más.</p>
+                `,
+                color: "text-stone-500"
+            },
+
+            // --- NUEVO FINAL DE FRACASO ---
+            "ending_klemper_suspicion_2": {
+                type: "ending",
+                title: "FIN DEL JUEGO: EL ASEDIO",
+                text: `
+                    <p>Tu respuesta (o tu silencio) no le gustó. La sonrisa de Klemper se borró.</p>
+                    <p class="mt-4">"Ya veo. Bueno, no se preocupen. Como son tan... *descuidados*... he decidido poner un guardia en su puerta. Para protegerlos, por supuesto."</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/4g0u42.mp3" type="audio/mpeg"></audio>
+                    <p class="mt-4">Se va. Estás bajo arresto domiciliario. No podés salir. Simone no puede entrar. La Resistencia no te contactará.</p>
+                    <p class="mt-4">Tres días después, Tom muere. Klemper gana sin disparar un solo tiro.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            // --- NUEVOS FINALES DE FRACASO ---
+            "ending_motor_pool_fail": {
+                type: "ending",
+                title: "FIN DEL JUEGO: SOBREVALORADO",
+                text: `
+                    <p>No se puede robar al ejército alemán y salir como si nada. El guardia grita. El segundo te rodea. No tenés escapatoria.</p>
+                    <p class="mt-4">Klemper sonríe cuando te ve. "El {chico/chica} de la harina... Sabía que había algo raro en vos".</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/blmrjm.mp3" type="audio/mpeg"></audio>
+                    <p class="mt-4">Nunca supiste si Tom escapó. Tu misión fracasó en el último paso.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            "ending_antoine_fail": {
+                type: "ending",
+                title: "FIN DEL JUEGO: EL PRECIO DE LA GUERRA",
+                text: `
+                    <p>Intentaste usar a un niño en una guerra de adultos. Los soldados te atrapan en segundos. Klemper te mira con desprecio mientras sujeta al niño.</p>
+                    <p class="mt-4">"Dos terroristas por el precio de uno", dice.</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/30iaxv.mp3" type="audio/mpeg"></audio>
+                    <p class="mt-4">Tu atajo moral costó tu vida, la del niño y la de Tom, que nunca salió del camión.</p>
+                `,
+                color: "text-red-600"
+            },
+
+            "ending_hero": {
+                type: "ending",
+                title: "VICTORIA: EL MÁRTIR",
+                text: `
+                    <p>Provocás la explosión. ¡Funciona! Klemper corre hacia el humo. El camión escapa con Tom.</p>
+                    <p class="mt-4">Pero no podés volver. Te han visto. Corrés al bosque con balas silbando a tu alrededor.</p>
+                    <p class="mt-4">Madame Perrault te encuentra días después. <strong class="text-green-400">"Tu vida anterior ha terminado, {name}. Ahora sos uno de nosotros".</strong></p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/r5kx89.mp3" type="audio/mpeg"></audio>
+                    <p class="mt-2">Salvaste al piloto, pero perdiste tu hogar. Ahora sos combatiente de la Resistencia.</p>
+                `,
+                color: "text-green-500"
+            },
+
+            "ending_strategist": {
+                type: "ending",
+                title: "VICTORIA PERFECTA: EL ESTRATEGA",
+                text: `
+                    <p>Denunciás a Renard por mercado negro. Klemper, furioso por la corrupción, va a arrestarlo. Todo el pueblo mira el espectáculo.</p>
+                    <p class="mt-4">Mientras tanto, el camión sale sin ser visto. Tom está a salvo.</p>
+                    <p class="mt-4">Esa noche, cenás con tus padres. Nadie sospecha nada. Klemper ejecutó a Renard (un villano menos). Usaste al enemigo contra el enemigo.</p>
+                    <p class="mt-4 p-4 bg-amber-900/30 border border-amber-700 rounded text-amber-100 font-bold text-center">Sobreviviste. Salvaste al piloto. Y nadie lo sabe.</p>
+                `,
+                color: "text-amber-400"
+            },
+
+            // --- NUEVO FINAL ---
+            "ending_too_slow": {
+                type: "ending",
+                title: "FIN DEL JUEGO: DEMASIADO TARDE",
+                text: `
+                    <p>Dudaste por un segundo de más. El pánico te paralizó.</p>
+                    <p class="mt-4">La puerta principal se abre de una patada. El Oficial Klemper te encuentra en medio de la cocina, sin una coartada, con el rastro de sangre aún fresco.</p>
+                    <p class="mt-4">"Qué amable de su parte esperarnos", dice Klemper. No hay escapatoria.</p>
+                    <audio controls class="w-full mt-2" preload="none" style="height: 30px;"><source src="https://files.catbox.moe/klngck.mp3" type="audio/mpeg"></audio>
+                `,
+                color: "text-red-600"
+            }
+        };
+
+        // --- Engine Functions ---
+
+        // Define globally so HTML can see it
+        window.setAvatar = function (g, url) {
+            state.gender = g;
+            state.avatarUrl = url;
+
+            // Clear all selections
+            ['avatar-1', 'avatar-2', 'avatar-3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('selected');
+            });
+
+            // Highlight the selected one
+            if (url === 'https://files.catbox.moe/7wj3bx.webp') document.getElementById('avatar-1').classList.add('selected');
+            if (url === 'https://files.catbox.moe/iwmjq3.webp') document.getElementById('avatar-2').classList.add('selected');
+            if (url === 'https://files.catbox.moe/85tmzo.webp') document.getElementById('avatar-3').classList.add('selected');
+
+            checkInput();
+        }
+
+        window.checkInput = function () {
+            const nameInput = document.getElementById('input-name');
+            const validationMsg = document.getElementById('validation-msg');
+
+            if (!nameInput) return;
+
+            state.name = nameInput.value.trim();
+
+            const container = document.querySelector('#scene-content');
+            let startBtn = document.getElementById('start-btn');
+
+            // Se necesita nombre Y género (que se setea con el avatar)
+            if (state.name && state.gender) {
+                if (!startBtn) {
+                    startBtn = document.createElement('button');
+                    startBtn.id = "start-btn";
+                    startBtn.className = "w-full mt-6 bg-gradient-to-r from-amber-800 to-stone-800 hover:from-amber-700 hover:to-stone-700 text-white font-bold py-4 px-6 rounded shadow-lg transform transition hover:-translate-y-1 fade-in uppercase tracking-wider border border-amber-600/30";
+                    startBtn.innerHTML = "CONFIRMAR IDENTIDAD";
+                    startBtn.onclick = () => loadScene('prologue');
+
+                    // Add to main container
+                    if (container) container.appendChild(startBtn);
+                }
+                if (validationMsg) validationMsg.style.opacity = "0";
+            } else {
+                if (startBtn) startBtn.remove();
+                if (validationMsg) validationMsg.style.opacity = "1";
+            }
+        }
+
+        function updateHeader() {
+            const display = document.getElementById('status-display');
+            const nameDisplay = document.getElementById('player-display-name');
+            const avatarImg = document.getElementById('header-avatar-img');
+
+            if (state.name && state.avatarUrl && state.currentScene !== 'title' && state.currentScene !== 'character_creation') {
+                display.classList.remove('hidden');
+                display.classList.add('flex', 'items-center'); // Asegurar flex layout
+                nameDisplay.textContent = state.name;
+                avatarImg.src = state.avatarUrl;
+            } else {
+                display.classList.add('hidden');
+                display.classList.remove('flex', 'items-center');
+                avatarImg.src = '';
+            }
+        }
+
+        // --- Nuevas funciones de temporizador ---
+        function startTimer(durationInSeconds) {
+            // Limpiar cualquier temporizador anterior
+            stopTimer();
+
+            const timerContainer = document.getElementById('timer-container');
+            if (timerContainer) {
+                timerContainer.innerHTML = `
+                    <div class="w-full bg-stone-600 rounded-full h-2 overflow-hidden border border-stone-800 shadow-inner">
+                        <div id="timer-bar-inner" class="h-full bg-red-600 rounded-full"></div>
+                    </div>
+                `;
+
+                const timerBar = document.getElementById('timer-bar-inner');
+                if (timerBar) {
+                    // Usar animación CSS para la barra visual
+                    timerBar.style.animation = `shrink ${durationInSeconds}s linear forwards`;
+                }
+            }
+
+            // Establecer el temporizador lógico para el final del juego
+            state.timerId = setTimeout(() => {
+                loadScene('ending_too_slow');
+            }, durationInSeconds * 1000);
+        }
+
+        function stopTimer() {
+            if (state.timerId) {
+                clearTimeout(state.timerId);
+                state.timerId = null;
+            }
+            // Limpiar la barra visual
+            const timerContainer = document.getElementById('timer-container');
+            if (timerContainer) {
+                timerContainer.innerHTML = '';
+            }
+        }
+
+        window.loadScene = function (sceneId) {
+            const scene = scenes[sceneId];
+            const contentDiv = document.getElementById('scene-content');
+            const choicesDiv = document.getElementById('choices-wrapper');
+
+            if (!scene) return;
+
+            // --- Lógica del Temporizador ---
+            // 1. Detener cualquier temporizador existente
+            //    (a menos que estemos cargando el final 'too_slow', en cuyo caso ya se detuvo)
+            if (sceneId !== 'ending_too_slow') {
+                stopTimer();
+            }
+
+            // 2. Comprobar si la *nueva* escena debe iniciar un temporizador
+            if (sceneId === 'scene_2_entry') {
+                startTimer(20); // Iniciar cuenta regresiva de 20 segundos
+            }
+            // --- Fin de la Lógica del Temporizador ---
+
+
+            // Update State
+            state.currentScene = sceneId;
+            updateHeader();
+
+            // Animation Reset
+            contentDiv.classList.remove('fade-in');
+            void contentDiv.offsetWidth; // Trigger reflow
+            contentDiv.classList.add('fade-in');
+
+            // Render Text
+            let htmlContent = "";
+
+            // Logic for different scene types
+            if (scene.type === 'ending') {
+                htmlContent += `<div class="flex flex-col items-center justify-center pt-8">`;
+                htmlContent += `<h2 class="text-2xl md:text-3xl font-bold mb-6 ${scene.color} tracking-wider text-center">${scene.title}</h2>`;
+                htmlContent += `<div class="text-lg leading-relaxed text-justify">${formatText(scene.text)}</div>`;
+                htmlContent += `<div class="mt-12 w-full max-w-xs mx-auto p-6 bg-stone-900 rounded-lg border border-stone-700 text-center shadow-xl">
+                    <p class="text-xs text-stone-500 mb-4 uppercase tracking-widest">Fin de la simulación</p>
+                    <button onclick="location.reload()" class="w-full px-6 py-3 bg-stone-700 hover:bg-stone-600 rounded text-stone-200 transition font-bold border border-stone-500">JUGAR OTRA VEZ</button>
+                </div>`;
+                htmlContent += `</div>`;
+
+                choicesDiv.innerHTML = ''; // No choices in ending
+            } else if (scene.type === 'static') {
+                // Title screen etc, handled purely in text area
+                htmlContent = scene.text;
+                choicesDiv.innerHTML = '';
+            } else if (scene.type === 'input') {
+                htmlContent = scene.text;
+                choicesDiv.innerHTML = ''; // No bottom choices for input scene
+            } else {
+                // Normal Story Scene
+                htmlContent = `<div class="text-lg leading-relaxed space-y-4 text-justify">${formatText(scene.text)}</div>`;
+
+                // Render Choices
+                choicesDiv.innerHTML = '';
+                scene.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+
+                    // Styling based on choice type
+                    let baseClasses = "choice-btn w-full text-left p-4 rounded-lg border transition flex items-center justify-between group shadow-md relative overflow-hidden ";
+
+                    if (choice.style === 'danger') {
+                        baseClasses += "bg-stone-800 border-red-900/30 text-stone-300 hover:bg-red-950 hover:border-red-800 hover:text-red-100";
+                    } else if (choice.style === 'highlight') {
+                        baseClasses += "bg-amber-900/20 border-amber-800/50 text-amber-100 hover:bg-amber-900/40 hover:border-amber-600";
+                    } else {
+                        baseClasses += "bg-stone-800 border-stone-700 text-stone-300 hover:bg-stone-700 hover:border-stone-500";
+                    }
+
+                    btn.className = baseClasses;
+                    btn.innerHTML = `
+                        <span class="z-10 font-medium">${formatText(choice.text)}</span>
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity text-xl z-10">→</span>
+                    `;
+                    btn.onclick = () => loadScene(choice.next);
+                    choicesDiv.appendChild(btn);
+                });
+            }
+
+            contentDiv.innerHTML = htmlContent;
+
+            // Post-render Logic: Attach listeners if it's the creation scene
+            if (scene.type === 'input') {
+                const inputEl = document.getElementById('input-name');
+                if (inputEl) {
+                    inputEl.addEventListener('input', checkInput);
+                    // Restore state if re-rendering (optional, simplistic here)
+                    if (state.name) inputEl.value = state.name;
+                    if (state.avatarUrl === 'https://files.catbox.moe/7wj3bx.webp') document.getElementById('avatar-1').classList.add('selected');
+                    if (state.avatarUrl === 'https://files.catbox.moe/iwmjq3.webp') document.getElementById('avatar-2').classList.add('selected');
+                    if (state.avatarUrl === 'https://files.catbox.moe/85tmzo.webp') document.getElementById('avatar-3').classList.add('selected');
+                    checkInput();
+                }
+            }
+
+            // Scroll to top
+            document.getElementById('game-container').scrollTop = 0;
+        }
+
+        // Start the game at title
+        loadScene('title');
+
+    </script>
+</body>
+
+</html>

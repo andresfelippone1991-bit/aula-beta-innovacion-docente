@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sombras del Poder</title>
+
+    <!-- Importación de Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;1,700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Librerías para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* --- VARIABLES DE ESTILO (Según Prompt) --- */
+        :root {
+            --fondo-principal: #1C1F26;
+            --fondo-paneles: #2B303A;
+            --color-libertad: #4CAF50;
+            --color-represion: #C62828;
+            --color-texto: #ECECEC;
+            --color-acento: #FFC107;
+            --color-texto-oscuro: #111;
+
+            --fuente-titulos: 'Oswald', sans-serif;
+            --fuente-cuerpo: 'Open Sans', sans-serif;
+            --fuente-situacion: 'Merriweather', serif;
+
+            --sombra: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- ESTILOS GLOBALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--fuente-cuerpo);
+            background-color: var(--fondo-principal);
+            color: var(--color-texto);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: var(--fuente-titulos);
+            text-transform: uppercase;
+            color: var(--color-acento);
+            letter-spacing: 1.1px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            font-family: var(--fuente-titulos);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid var(--color-acento);
+            background-color: transparent;
+            color: var(--color-acento);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--color-acento);
+            color: var(--color-texto-oscuro);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        }
+
+        button:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        button.btn-danger {
+            border-color: var(--color-represion);
+            color: var(--color-represion);
+        }
+
+        button.btn-danger:hover {
+            background-color: var(--color-represion);
+            color: var(--color-texto);
+            box-shadow: 0 0 15px rgba(198, 40, 40, 0.5);
+        }
+
+        button.btn-success {
+            border-color: var(--color-libertad);
+            color: var(--color-libertad);
+        }
+
+        button.btn-success:hover {
+            background-color: var(--color-libertad);
+            color: var(--color-texto);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+
+        input[type="text"] {
+            font-family: var(--fuente-cuerpo);
+            font-size: 1.1rem;
+            padding: 0.7rem;
+            border: 2px solid var(--fondo-paneles);
+            background-color: #fff;
+            color: var(--color-texto-oscuro);
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--color-acento);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            background-color: var(--fondo-paneles);
+            border-radius: 8px;
+            box-shadow: var(--sombra);
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            /* Oculto por defecto */
+            padding: 2rem;
+            min-height: 80vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* --- ESTILOS DE PANTALLAS --- */
+
+        /* Lobby (#lobby-screen) */
+        #lobby-screen h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        #lobby-screen .lobby-note {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-style: italic;
+            color: var(--color-acento);
+        }
+
+        .player-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .player-input-group input {
+            flex-grow: 1;
+        }
+
+        #player-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        #player-list li {
+            background-color: var(--fondo-principal);
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        #player-list .remove-player {
+            background: none;
+            border: none;
+            color: var(--color-represion);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .lobby-actions {
+            text-align: center;
+        }
+
+        /* Revelación de Roles (#role-reveal-screen) */
+        #role-reveal-screen {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #reveal-player-name {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #reveal-role-display {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            min-height: 2em;
+            color: var(--color-acento);
+            font-weight: bold;
+        }
+
+        /* Pantalla Principal del Juego (#game-screen) */
+        #game-screen {
+            display: none;
+            /* Inicia oculto, se activa con JS */
+            flex-direction: column;
+            padding: 0;
+        }
+
+        #game-screen.active {
+            display: flex;
+        }
+
+        /* Header (Puntajes) */
+        .game-header {
+            background-color: var(--fondo-principal);
+            padding: 1.2rem 2rem;
+            border-bottom: 2px solid var(--color-acento);
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .score-display span {
+            font-family: var(--fuente-titulos);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .score-display .liberty-score {
+            color: var(--color-libertad);
+        }
+
+        .score-display .repression-score {
+            color: var(--color-represion);
+        }
+
+        .score-bar-container {
+            width: 100%;
+            height: 25px;
+            background-color: #111;
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--fondo-paneles);
+        }
+
+        #liberty-bar {
+            background-color: var(--color-libertad);
+            height: 100%;
+            width: 50%;
+            /* Inicia en 50% */
+            transition: width 0.5s ease-out;
+            border-right: 2px solid var(--color-acento);
+        }
+
+        #repression-bar {
+            background-color: var(--color-represion);
+            height: 100%;
+            width: 50%;
+            /* Inicia en 50% */
+            transition: width 0.5s ease-out;
+        }
+
+        /* Contenido Principal (Sidebar + Panel) */
+        .game-main-content {
+            display: flex;
+            flex-direction: row;
+            min-height: 70vh;
+        }
+
+        /* Sidebar (Jugadores) */
+        .game-sidebar {
+            width: 30%;
+            min-width: 250px;
+            background-color: var(--fondo-principal);
+            padding: 1.5rem;
+            border-right: 1px solid #444;
+        }
+
+        .game-sidebar h3 {
+            border-bottom: 2px solid var(--color-acento);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #game-player-list {
+            list-style: none;
+        }
+
+        #game-player-list li {
+            padding: 0.8rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        #game-player-list li.current-turn {
+            background-color: var(--color-acento);
+            color: var(--color-texto-oscuro);
+            font-weight: bold;
+        }
+
+        #game-player-list li .player-status {
+            font-size: 1.2rem;
+            color: var(--color-libertad);
+        }
+
+        #game-player-list li.current-turn .player-status {
+            color: var(--color-texto-oscuro);
+        }
+
+        /* Panel Central (Situación) */
+        .game-panel {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .situation-card {
+            margin-bottom: 2rem;
+        }
+
+        #situation-counter {
+            font-family: var(--fuente-cuerpo);
+            font-style: italic;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        #situation-title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        #situation-description {
+            font-family: var(--fuente-situacion);
+            font-size: 1.25rem;
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        .turn-indicator {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        #current-turn-player {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--color-acento);
+        }
+
+        .decision-prompt {
+            text-align: center;
+        }
+
+        #take-decision-btn {
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+        }
+
+        /* Footer (Guía) */
+        .game-footer {
+            text-align: center;
+            padding: 1rem 2rem;
+            border-top: 1px solid #444;
+        }
+
+        #show-guide-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-family: var(--fuente-cuerpo);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Pantalla Final (#end-game-screen) */
+        #end-game-screen {
+            text-align: center;
+        }
+
+        #end-game-screen h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        #final-scores {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        #agent-reveal {
+            background-color: var(--fondo-principal);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+        }
+
+        .end-game-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        /* --- MODALES --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.85);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--fondo-paneles);
+            margin: auto;
+            padding: 2.5rem;
+            border-top: 5px solid var(--color-acento);
+            width: 90%;
+            max-width: 700px;
+            border-radius: 8px;
+            box-shadow: var(--sombra);
+            position: relative;
+        }
+
+        /* Modal de Decisión */
+        #decision-modal .modal-content {
+            background-color: #111;
+            /* Más oscuro para privacidad */
+            border-top-color: var(--color-acento);
+            text-align: center;
+        }
+
+        #decision-header {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        #decision-player-name {
+            font-size: 1.5rem;
+        }
+
+        #decision-player-role {
+            font-size: 1.2rem;
+            color: var(--color-acento);
+            font-weight: bold;
+        }
+
+        #decision-situation-info {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        #decision-situation-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        #decision-situation-info p {
+            font-family: var(--fuente-situacion);
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        #decision-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #decision-options button {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 1.2rem;
+            border-color: #777;
+            color: #ccc;
+        }
+
+        #decision-options button:hover {
+            border-color: var(--color-acento);
+            background-color: var(--color-acento);
+            color: var(--color-texto-oscuro);
+        }
+
+        /* Modal Guía Didáctica */
+        #guide-modal h2 {
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        #guide-modal p {
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal-btn {
+            /* Botón grande y amarillo para cerrar, bueno para móviles */
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .container {
+                min-height: 100vh;
+                border-radius: 0;
+            }
+
+            .screen {
+                padding: 1.5rem;
+            }
+
+            .game-main-content {
+                flex-direction: column;
+            }
+
+            .game-sidebar {
+                width: 100%;
+                min-width: auto;
+                border-right: none;
+                border-bottom: 1px solid #444;
+            }
+
+            .game-panel {
+                padding: 1.5rem;
+            }
+
+            #situation-title {
+                font-size: 1.8rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 2rem 1.5rem;
+            }
+
+            .end-game-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- ===== PANTALLA 1: LOBBY ===== -->
+        <div id="lobby-screen" class="screen active">
+            <h1>Sombras del Poder</h1>
+            <p class="lobby-note">Un juego de simulación sobre decisiones en tiempos de autoritarismo.<br>Roles
+                secretos: uno de los jugadores será el Agente Infiltrado. Nadie debe revelar su rol.</p>
+
+            <div class="player-input-group">
+                <input type="text" id="player-name-input" placeholder="Ingresar nombre del participante (2-5)">
+                <button id="add-player-btn">Agregar</button>
+            </div>
+
+            <ul id="player-list">
+                <!-- Jugadores se añaden aquí dinámicamente -->
+            </ul>
+
+            <div class="lobby-actions">
+                <button id="start-game-btn" disabled>Repartir Roles e Iniciar</button>
+            </div>
+        </div>
+
+        <!-- ===== PANTALLA 2: REVELACIÓN DE ROLES ===== -->
+        <div id="role-reveal-screen" class="screen">
+            <h2 id="reveal-player-name">Turno de: [Jugador]</h2>
+            <p>Por favor, mira la pantalla en privado.</p>
+
+            <div id="reveal-role-display">[Tu rol se mostrará aquí]</div>
+
+            <button id="show-role-btn">Mostrar mi Rol Secreto</button>
+            <button id="hide-role-btn" style="display: none;">Ocultar y Siguiente Jugador</button>
+            <button id="start-main-game-btn" style="display: none;">¡Comenzar el juego!</button>
+        </div>
+
+        <!-- ===== PANTALLA 3: JUEGO PRINCIPAL ===== -->
+        <div id="game-screen" class="screen">
+
+            <!-- Cabecera con puntajes -->
+            <header class="game-header">
+                <div class="score-display">
+                    <span class="liberty-score">Libertad: <span id="liberty-score-value">0</span></span>
+                    <span class="repression-score">Represión: <span id="repression-score-value">0</span></span>
+                </div>
+                <div class="score-bar-container">
+                    <div id="liberty-bar"></div>
+                    <div id="repression-bar"></div>
+                </div>
+            </header>
+
+            <!-- Contenido principal -->
+            <div class="game-main-content">
+                <!-- Sidebar de jugadores -->
+                <aside class="game-sidebar">
+                    <h3>Jugadores</h3>
+                    <ul id="game-player-list">
+                        <!-- Lista de jugadores en partida -->
+                    </ul>
+                </aside>
+
+                <!-- Panel de situación -->
+                <main class="game-panel">
+                    <div class="situation-card">
+                        <div id="situation-counter">Situación 1 / 15</div>
+                        <h2 id="situation-title">[Título de la Situación]</h2>
+                        <p id="situation-description">[Descripción de la situación]</p>
+                    </div>
+
+                    <div class="turn-indicator">
+                        <h3>Turno de:</h3>
+                        <div id="current-turn-player">[Nombre del Jugador]</div>
+                    </div>
+
+                    <div class="decision-prompt">
+                        <button id="take-decision-btn">Tomar Decisión (Privado)</button>
+                    </div>
+                </main>
+            </div>
+
+            <footer class="game-footer">
+                <button id="show-guide-btn">Guía Didáctica / Recordatorio</button>
+            </footer>
+        </div>
+
+        <!-- ===== PANTALLA 4: FIN DEL JUEGO ===== -->
+        <div id="end-game-screen" class="screen">
+            <h1>Fin del Juego</h1>
+
+            <div id="final-scores">
+                <h2>Puntaje Final</h2>
+                <p>Libertad: <span id="final-liberty-score">0</span></p>
+                <p>Represión: <span id="final-repression-score">0</span></p>
+            </div>
+
+            <div id="agent-reveal">
+                <!-- Se rellena con JS -->
+            </div>
+
+            <div class="end-game-actions">
+                <button id="restart-game-btn">Reiniciar Partida</button>
+                <button id="download-report-btn">Descargar Reporte (PDF)</button>
+            </div>
+        </div>
+
+    </div> <!-- .container -->
+
+    <!-- ===== MODALES ===== -->
+
+    <!-- Modal de Decisión (Privado) -->
+    <div id="decision-modal" class="modal">
+        <div class="modal-content">
+            <div id="decision-header">
+                <div id="decision-player-name">Turno de: [Jugador]</div>
+                <div id="decision-player-role">Tu Rol: [Rol Secreto]</div>
+            </div>
+            <div id="decision-situation-info">
+                <h3 id="decision-situation-title">[Título Situación]</h3>
+                <p id="decision-situation-desc">[Descripción]</p>
+            </div>
+            <div id="decision-options">
+                <!-- Botones de opción se añaden con JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Guía Didáctica -->
+    <div id="guide-modal" class="modal">
+        <div class="modal-content">
+            <h2>Guía Didáctica</h2>
+            <p>Este juego es una simulación inspirada en los mecanismos de control social utilizados durante la última
+                dictadura cívico-militar en Argentina (1976-1983), en el marco de la **Doctrina de Seguridad Nacional**.
+            </p>
+            <p>La Doctrina de Seguridad Nacional fue una política impulsada por Estados Unidos en América Latina durante
+                la Guerra Fría. Su objetivo era eliminar cualquier forma de disidencia u oposición política,
+                etiquetándola como "subversión" o "enemigo interno".</p>
+            <p>En este juego, exploramos cómo el miedo, la propaganda y la delación pueden fracturar la solidaridad
+                social. El "Agente Infiltrado" representa a los servicios de inteligencia que buscaban desarticular la
+                organización popular desde adentro.</p>
+            <p><strong>Reflexión:</strong> ¿Cómo impactaron tus decisiones en el grupo? ¿Qué mecanismos usó el agente
+                (si lo hubo) para ganar? ¿Qué tan fácil fue priorizar la supervivencia individual sobre la acción
+                colectiva? Recordar es la mejor forma de asegurar que "Nunca Más" ocurran estos hechos.</p>
+            <button id="close-guide-btn" class="close-modal-btn">Volver al Juego</button>
+        </div>
+    </div>
+
+
+    <!-- ===== SCRIPT PRINCIPAL ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- VARIABLES GLOBALES DEL JUEGO ---
+
+            // Referencias del DOM
+            const screens = {
+                lobby: document.getElementById('lobby-screen'),
+                roleReveal: document.getElementById('role-reveal-screen'),
+                game: document.getElementById('game-screen'),
+                endGame: document.getElementById('end-game-screen'),
+            };
+
+            const modals = {
+                decision: document.getElementById('decision-modal'),
+                guide: document.getElementById('guide-modal'),
+            };
+
+            // Elementos del Lobby
+            const playerNameInput = document.getElementById('player-name-input');
+            const addPlayerBtn = document.getElementById('add-player-btn');
+            const playerList = document.getElementById('player-list');
+            const startGameBtn = document.getElementById('start-game-btn');
+
+            // Elementos de Revelación de Rol
+            const revealPlayerName = document.getElementById('reveal-player-name');
+            const revealRoleDisplay = document.getElementById('reveal-role-display');
+            const showRoleBtn = document.getElementById('show-role-btn');
+            const hideRoleBtn = document.getElementById('hide-role-btn');
+            const startMainGameBtn = document.getElementById('start-main-game-btn');
+
+            // Elementos del Juego Principal
+            const libertyScoreValue = document.getElementById('liberty-score-value');
+            const repressionScoreValue = document.getElementById('repression-score-value');
+            const libertyBar = document.getElementById('liberty-bar');
+            const repressionBar = document.getElementById('repression-bar');
+            const gamePlayerList = document.getElementById('game-player-list');
+            const situationCounter = document.getElementById('situation-counter');
+            const situationTitle = document.getElementById('situation-title');
+            const situationDescription = document.getElementById('situation-description');
+            const currentTurnPlayer = document.getElementById('current-turn-player');
+            const takeDecisionBtn = document.getElementById('take-decision-btn');
+            const showGuideBtn = document.getElementById('show-guide-btn');
+            const closeGuideBtn = document.getElementById('close-guide-btn');
+
+            // Elementos del Modal de Decisión
+            const decisionPlayerName = document.getElementById('decision-player-name');
+            const decisionPlayerRole = document.getElementById('decision-player-role');
+            const decisionSituationTitle = document.getElementById('decision-situation-title');
+            const decisionSituationDesc = document.getElementById('decision-situation-desc');
+            const decisionOptions = document.getElementById('decision-options');
+
+            // Elementos de Fin de Juego
+            const finalLibertyScore = document.getElementById('final-liberty-score');
+            const finalRepressionScore = document.getElementById('final-repression-score');
+            const agentReveal = document.getElementById('agent-reveal');
+            const restartGameBtn = document.getElementById('restart-game-btn');
+            const downloadReportBtn = document.getElementById('download-report-btn');
+
+            // Estado del Juego
+            let gameState = {
+                players: [], // { name: 'Nombre', role: 'Rol', id: 0 }
+                situations: [], // Copia mezclada del banco
+                currentSituationIndex: 0,
+                currentPlayerTurn: 0, // Índice del jugador en gameState.players
+                gameScores: {
+                    libertad: 0,
+                    represion: 0
+                },
+                decisionLog: [], // { situation: 'Título', playerName: 'Nombre', playerRole: 'Rol', decision: 'Texto', effect: {l, r} }
+                decisionsThisRound: 0,
+            };
+
+            const ROLES_BASE = ["Estudiante", "Artista", "Profesor", "Periodista", "Obrero"];
+            const ROL_AGENTE = "Agente Infiltrado";
+
+
+            // --- BANCO DE SITUACIONES (Según Prompt) ---
+            // Cada situación tiene opciones "default" y "Agente Infiltrado"
+            const SITUATIONS_BANK = [
+                {
+                    title: "Ley de Reuniones Restringidas",
+                    description: "El gobierno acaba de limitar las reuniones públicas a 5 personas.",
+                    options: {
+                        default: [
+                            { text: "Organizar reunión clandestina (+5 pers.)", effect: { libertad: 3, represion: -1 } },
+                            { text: "Buscar formas de protesta digital/anónima", effect: { libertad: 2, represion: 0 } },
+                            { text: "Acatar la ley por miedo a represalias", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Asistir a la reunión clandestina para informar", effect: { libertad: -3, represion: 3 } },
+                            { text: "Proponer la protesta digital (más fácil de rastrear)", effect: { libertad: 0, represion: 2 } },
+                            { text: "Fomentar el miedo a la ley entre el grupo", effect: { libertad: -2, represion: 2 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Profesor Detenido",
+                    description: "Un profesor fue detenido por repartir un volante crítico.",
+                    options: {
+                        default: [
+                            { text: "Convocar paro estudiantil y exigir liberación", effect: { libertad: 4, represion: -1 } },
+                            { text: "Juntar firmas en silencio y presentar un petitorio", effect: { libertad: 2, represion: 0 } },
+                            { text: "Distanciarse del profesor por seguridad", effect: { libertad: -3, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Ofrecerse a liderar el paro (para identificar líderes)", effect: { libertad: -3, represion: 3 } },
+                            { text: "Controlar la junta de firmas (copiar nombres)", effect: { libertad: -1, represion: 3 } },
+                            { text: "Acusar al profesor de \"imprudente\" y \"buscarlo\"", effect: { libertad: -3, represion: 2 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Lista Negra Cultural",
+                    description: "Se filtra una ‘lista negra’ de artistas que no pueden tocar.",
+                    options: {
+                        default: [
+                            { text: "Organizar un festival clandestino con ellos", effect: { libertad: 3, represion: 0 } },
+                            { text: "Difundir la lista en el extranjero", effect: { libertad: 2, represion: -1 } },
+                            { text: "Dejar de escuchar esa música por miedo", effect: { libertad: -2, represion: 1 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Ofrecer un \"lugar seguro\" para el festival (emboscada)", effect: { libertad: -4, represion: 4 } },
+                            { text: "Sugerir que la lista es \"falsa\" para calmar al grupo", effect: { libertad: 0, represion: 2 } },
+                            { text: "Denunciar a quienes aún difunden esa música", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Cierre de Radio Local",
+                    description: "Se clausura una radio local por difundir un reportaje.",
+                    options: {
+                        default: [
+                            { text: "Tomar la radio y transmitir por la fuerza", effect: { libertad: 4, represion: -1 } },
+                            { text: "Crear una radio \"pirata\" con equipos caseros", effect: { libertad: 3, represion: 0 } },
+                            { text: "Aceptar el cierre y buscar noticias en medios oficiales", effect: { libertad: -3, represion: 3 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Infiltrarse en la radio \"pirata\" para sabotearla", effect: { libertad: -2, represion: 3 } },
+                            { text: "Difundir el rumor de que la radio \"mentía\"", effect: { libertad: -1, represion: 2 } },
+                            { text: "Reportar a los periodistas que intentan seguir", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Rumor de Atentado",
+                    description: "Aparece un rumor en prensa oficial sobre un supuesto atentado estudiantil.",
+                    options: {
+                        default: [
+                            { text: "Desmentir públicamente (rueda de prensa)", effect: { libertad: 2, represion: 0 } },
+                            { text: "Investigar quién originó el rumor", effect: { libertad: 1, represion: 0 } },
+                            { text: "Creer el rumor y condenar la \"violencia\" estudiantil", effect: { libertad: -3, represion: 3 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Confirmar el rumor (plantar \"pruebas\" falsas)", effect: { libertad: -4, represion: 4 } },
+                            { text: "Sugerir que \"algunos estudiantes son violentos\"", effect: { libertad: -2, represion: 3 } },
+                            { text: "Aprovechar para pedir \"más control\" en la universidad", effect: { libertad: -2, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Huelga Obrera",
+                    description: "Una fábrica convoca a huelga por despidos masivos.",
+                    options: {
+                        default: [
+                            { text: "Unirse a la huelga y marchar con ellos", effect: { libertad: 3, represion: -1 } },
+                            { text: "Hacer un \"fondo de huelga\" (juntar dinero)", effect: { libertad: 2, represion: 0 } },
+                            { text: "No involucrarse y proteger el puesto de trabajo", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Romper la huelga (ser \"carnero\")", effect: { libertad: -3, represion: 3 } },
+                            { text: "Infiltrar la asamblea para proponer medidas violentas", effect: { libertad: -2, represion: 3 } },
+                            { text: "Reportar a los organizadores de la huelga", effect: { libertad: -4, represion: 4 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Control en la Universidad",
+                    description: "Militares ingresan a la universidad para revisar aulas.",
+                    options: {
+                        default: [
+                            { text: "Hacer una sentada pacífica y bloquear el paso", effect: { libertad: 3, represion: 0 } },
+                            { text: "Esconder material \"comprometido\" (libros, volantes)", effect: { libertad: 1, represion: 0 } },
+                            { text: "Irse a casa y no volver hasta que se vayan", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Indicarles qué aulas o profesores \"revisar\"", effect: { libertad: -4, represion: 4 } },
+                            { text: "Plantar material \"subversivo\" en el aula de un colega", effect: { libertad: -5, represion: 5 } },
+                            { text: "Decir que el control es \"necesario por seguridad\"", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Carta Anónima",
+                    description: "Un texto denuncia torturas en un destacamento y circula discretamente.",
+                    options: {
+                        default: [
+                            { text: "Hacer copias y repartirlas en buzones", effect: { libertad: 3, represion: -1 } },
+                            { text: "Entregarla a un contacto en embajada extranjera", effect: { libertad: 2, represion: 0 } },
+                            { text: "Quemar la carta inmediatamente por miedo", effect: { libertad: -3, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Identificar quién la está repartiendo", effect: { libertad: -3, represion: 3 } },
+                            { text: "Crear una carta falsa (desinformación)", effect: { libertad: -2, represion: 3 } },
+                            { text: "Quedarse con la carta y entregarla a superiores", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Concierto Cancelado",
+                    description: "La policía suspende un recital de rock por ‘orden de seguridad’.",
+                    options: {
+                        default: [
+                            { text: "Tocar igual en la plaza, sin permisos", effect: { libertad: 3, represion: 0 } },
+                            { text: "Protestar frente a la comisaría", effect: { libertad: 2, represion: -1 } },
+                            { text: "Acatar la orden y suspender", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Animar a tocar igual (para generar arrestos)", effect: { libertad: -3, represion: 3 } },
+                            { text: "Cortar los cables de sonido disimuladamente", effect: { libertad: -2, represion: 2 } },
+                            { text: "Hacer la denuncia anónima que causó la suspensión", effect: { libertad: -4, represion: 4 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Campaña Patriótica",
+                    description: "Medios estatales lanzan una campaña de ‘unidad nacional’.",
+                    options: {
+                        default: [
+                            { text: "Ignorarla y seguir con la agenda propia", effect: { libertad: 1, represion: 0 } },
+                            { text: "Hacer una contra-campaña (parodia, sátira)", effect: { libertad: 2, represion: -1 } },
+                            { text: "Adherir a la campaña por conveniencia", effect: { libertad: -3, represion: 3 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Promover activamente la campaña en el grupo", effect: { libertad: -2, represion: 3 } },
+                            { text: "Usar la campaña para acusar de \"anti-patria\" a opositores", effect: { libertad: -3, represion: 3 } },
+                            { text: "Reportar a quienes se burlen de la campaña", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Registro Domiciliario",
+                    description: "Hay operativos de registro nocturno en barrios obreros.",
+                    options: {
+                        default: [
+                            { text: "Organizar un sistema de alarma (luces, silbatos)", effect: { libertad: 3, represion: 0 } },
+                            { text: "Ofrecer la casa como \"refugio seguro\" temporal", effect: { libertad: 2, represion: 0 } },
+                            { text: "Asegurarse de no tener nada \"ilegal\" y no abrir a nadie", effect: { libertad: -2, represion: 1 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Pasar la dirección de la \"casa segura\"", effect: { libertad: -5, represion: 5 } },
+                            { text: "Desactivar el sistema de alarma del barrio", effect: { libertad: -4, represion: 4 } },
+                            { text: "Sugerir que \"solo registran a los culpables\"", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Discurso del Ministro",
+                    description: "El ministro declara: ‘El enemigo interno debe ser eliminado’.",
+                    options: {
+                        default: [
+                            { text: "Realizar una pintada nocturna: \"El enemigo es el gobierno\"", effect: { libertad: 2, represion: -1 } },
+                            { text: "Redoblar medidas de seguridad personal y grupal", effect: { libertad: 1, represion: 0 } },
+                            { text: "Mostrar acuerdo público con el discurso (supervivencia)", effect: { libertad: -4, represion: 4 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Aplaudir el discurso y señalar \"enemigos internos\" en el grupo", effect: { libertad: -4, represion: 4 } },
+                            { text: "Ofrecerse a \"cuidar\" al grupo (vigilancia)", effect: { libertad: -3, represion: 3 } },
+                            { text: "Aprovechar el pánico para sembrar desconfianza", effect: { libertad: -2, represion: 2 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Informe Extranjero",
+                    description: "Un periodista extranjero investiga desapariciones.",
+                    options: {
+                        default: [
+                            { text: "Darle testimonio (con nombre y apellido)", effect: { libertad: 4, represion: -1 } },
+                            { text: "Pasarle contactos de familiares anónimamente", effect: { libertad: 2, represion: 0 } },
+                            { text: "Negarse a hablar por miedo a ser visto", effect: { libertad: -2, represion: 1 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Darle testimonio falso (desinformar)", effect: { libertad: -3, represion: 3 } },
+                            { text: "Seguir al periodista y reportar con quién habla", effect: { libertad: -4, represion: 4 } },
+                            { text: "Acusar al periodista de ser \"espía extranjero\"", effect: { libertad: -3, represion: 3 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Manifestación Estudiantil",
+                    description: "Estudiantes convocan una marcha por la libertad de cátedra.",
+                    options: {
+                        default: [
+                            { text: "Ir en primera fila y llevar pancartas", effect: { libertad: 3, represion: -1 } },
+                            { text: "Asistir, pero mantenerse en los bordes, listo para correr", effect: { libertad: 1, represion: 0 } },
+                            { text: "Criticar la marcha por \"ingenua\" y \"peligrosa\"", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Infiltrar la marcha y tomar fotos de los asistentes", effect: { libertad: -3, represion: 3 } },
+                            { text: "Iniciar cánticos violentos para provocar represión", effect: { libertad: -4, represion: 4 } },
+                            { text: "Reportar a los organizadores antes de la marcha", effect: { libertad: -5, represion: 5 } }
+                        ]
+                    }
+                },
+                {
+                    title: "Prohibición de Canciones",
+                    description: "Canciones en otro idioma son prohibidas en las radios.",
+                    options: {
+                        default: [
+                            { text: "Pasar cassettes grabados de mano en mano", effect: { libertad: 2, represion: 0 } },
+                            { text: "Traducir las letras y repartirlas como \"poesía\"", effect: { libertad: 1, represion: 0 } },
+                            { text: "Acatar y escuchar solo música aprobada", effect: { libertad: -2, represion: 2 } }
+                        ],
+                        "Agente Infiltrado": [
+                            { text: "Interceptar los cassettes y entregarlos", effect: { libertad: -3, represion: 3 } },
+                            { text: "Denunciar a quienes traduzcan las letras", effect: { libertad: -3, represion: 3 } },
+                            { text: "Felicitar la medida por \"proteger la cultura nacional\"", effect: { libertad: -2, represion: 2 } }
+                        ]
+                    }
+                }
+            ];
+
+
+            // --- LÓGICA DEL LOBBY ---
+
+            addPlayerBtn.addEventListener('click', handleAddPlayer);
+            playerNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleAddPlayer();
+            });
+
+            function handleAddPlayer() {
+                const name = playerNameInput.value.trim();
+                if (name && gameState.players.length < 5) {
+                    gameState.players.push({ name: name, role: null, id: gameState.players.length });
+                    playerNameInput.value = '';
+                    updatePlayerList();
+                }
+                if (gameState.players.length >= 5) {
+                    playerNameInput.disabled = true;
+                    addPlayerBtn.disabled = true;
+                }
+            }
+
+            function updatePlayerList() {
+                playerList.innerHTML = '';
+                gameState.players.forEach((player, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = player.name;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = '×';
+                    removeBtn.className = 'remove-player';
+                    removeBtn.onclick = () => removePlayer(index);
+                    li.appendChild(removeBtn);
+                    playerList.appendChild(li);
+                });
+                // Habilitar botón de inicio
+                startGameBtn.disabled = gameState.players.length < 2 || gameState.players.length > 5;
+            }
+
+            function removePlayer(index) {
+                gameState.players.splice(index, 1);
+                // Re-asignar IDs
+                gameState.players.forEach((player, i) => player.id = i);
+                updatePlayerList();
+                // Re-habilitar inputs si bajamos de 5
+                if (gameState.players.length < 5) {
+                    playerNameInput.disabled = false;
+                    addPlayerBtn.disabled = false;
+                }
+            }
+
+            startGameBtn.addEventListener('click', initializeGame);
+
+            // --- LÓGICA DE INICIALIZACIÓN DEL JUEGO ---
+
+            function initializeGame() {
+                // 1. Asignar Roles
+                assignRoles();
+                // 2. Mezclar Situaciones
+                gameState.situations = shuffleArray([...SITUATIONS_BANK]);
+                // 3. Resetear contadores
+                gameState.currentSituationIndex = 0;
+                gameState.currentPlayerTurn = 0;
+                gameState.gameScores = { libertad: 0, represion: 0 };
+                gameState.decisionLog = [];
+                gameState.decisionsThisRound = 0;
+                // 4. Iniciar Pantalla de Revelación de Roles
+                startRoleReveal();
+            }
+
+            function assignRoles() {
+                const numPlayers = gameState.players.length;
+                let rolesToAssign = shuffleArray([...ROLES_BASE]).slice(0, numPlayers);
+
+                // Si hay 3 o más jugadores, 1 es Agente
+                if (numPlayers >= 3) {
+                    const agentIndex = Math.floor(Math.random() * numPlayers);
+                    rolesToAssign[agentIndex] = ROL_AGENTE;
+                }
+
+                // Mezclar de nuevo antes de asignar
+                rolesToAssign = shuffleArray(rolesToAssign);
+
+                gameState.players.forEach((player, index) => {
+                    player.role = rolesToAssign[index];
+                });
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // --- LÓGICA DE REVELACIÓN DE ROLES ---
+
+            let currentPlayerRevealIndex = 0;
+
+            function startRoleReveal() {
+                currentPlayerRevealIndex = 0;
+                showScreen(screens.roleReveal);
+                updateRoleRevealScreen();
+            }
+
+            function updateRoleRevealScreen() {
+                const player = gameState.players[currentPlayerRevealIndex];
+                revealPlayerName.textContent = `Turno de: ${player.name}`;
+                revealRoleDisplay.textContent = "[Tu rol se mostrará aquí]";
+                revealRoleDisplay.style.display = 'none';
+
+                showRoleBtn.style.display = 'block';
+                hideRoleBtn.style.display = 'none';
+                startMainGameBtn.style.display = 'none';
+            }
+
+            showRoleBtn.addEventListener('click', () => {
+                const player = gameState.players[currentPlayerRevealIndex];
+                revealRoleDisplay.textContent = `Tu rol secreto es: ${player.role}`;
+                revealRoleDisplay.style.display = 'block';
+
+                showRoleBtn.style.display = 'none';
+
+                // Es el último jugador?
+                if (currentPlayerRevealIndex === gameState.players.length - 1) {
+                    startMainGameBtn.style.display = 'block';
+                } else {
+                    hideRoleBtn.style.display = 'block';
+                }
+            });
+
+            hideRoleBtn.addEventListener('click', () => {
+                currentPlayerRevealIndex++;
+                updateRoleRevealScreen();
+            });
+
+            startMainGameBtn.addEventListener('click', () => {
+                startMainGame();
+            });
+
+            // --- LÓGICA DEL JUEGO PRINCIPAL ---
+
+            function startMainGame() {
+                showScreen(screens.game);
+                updateScoreUI();
+                updateGamePlayerList();
+                startSituation();
+            }
+
+            function startSituation() {
+                if (gameState.currentSituationIndex >= gameState.situations.length) {
+                    endGame();
+                    return;
+                }
+
+                // Resetear estado de jugadores para la ronda
+                gameState.players.forEach(p => p.hasDecided = false);
+                gameState.decisionsThisRound = 0;
+                gameState.currentPlayerTurn = 0;
+
+                const situation = gameState.situations[gameState.currentSituationIndex];
+                situationCounter.textContent = `Situación ${gameState.currentSituationIndex + 1} / ${gameState.situations.length}`;
+                situationTitle.textContent = situation.title;
+                situationDescription.textContent = situation.description;
+
+                updateTurnUI();
+            }
+
+            function updateTurnUI() {
+                // Actualizar lista de jugadores (marcar quién decidió)
+                updateGamePlayerList();
+
+                const player = gameState.players[gameState.currentPlayerTurn];
+
+                // Actualizar panel central
+                currentTurnPlayer.textContent = player.name;
+
+                // Habilitar/Deshabilitar botón de decisión
+                takeDecisionBtn.disabled = false;
+                takeDecisionBtn.textContent = `Tomar Decisión (${player.name})`;
+            }
+
+            function updateGamePlayerList() {
+                gamePlayerList.innerHTML = '';
+                gameState.players.forEach((player, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = player.name;
+
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'player-status';
+
+                    if (index === gameState.currentPlayerTurn) {
+                        li.classList.add('current-turn');
+                        statusSpan.textContent = 'Decidiendo...';
+                    } else if (player.hasDecided) {
+                        statusSpan.textContent = '✓ Decidió';
+                    }
+
+                    li.appendChild(statusSpan);
+                    gamePlayerList.appendChild(li);
+                });
+            }
+
+            takeDecisionBtn.addEventListener('click', showDecisionModal);
+
+            function showDecisionModal() {
+                const player = gameState.players[gameState.currentPlayerTurn];
+                const situation = gameState.situations[gameState.currentSituationIndex];
+
+                // Rellenar info del modal
+                decisionPlayerName.textContent = `Turno de: ${player.name}`;
+                decisionPlayerRole.textContent = `Tu Rol: ${player.role}`;
+                decisionSituationTitle.textContent = situation.title;
+                decisionSituationDesc.textContent = situation.description;
+
+                // Determinar qué set de opciones usar
+                const optionsSet = situation.options[player.role] || situation.options.default;
+
+                // Limpiar opciones anteriores y crear nuevas
+                decisionOptions.innerHTML = '';
+                optionsSet.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.textContent = option.text;
+                    btn.onclick = () => handleDecision(option);
+                    decisionOptions.appendChild(btn);
+                });
+
+                modals.decision.classList.add('active');
+                takeDecisionBtn.disabled = true; // Deshabilitar botón mientras el modal está abierto
+            }
+
+            function handleDecision(option) {
+                const player = gameState.players[gameState.currentPlayerTurn];
+                const situation = gameState.situations[gameState.currentSituationIndex];
+
+                // 1. Marcar al jugador
+                player.hasDecided = true;
+                gameState.decisionsThisRound++;
+
+                // 2. Registrar la decisión
+                gameState.decisionLog.push({
+                    situationIndex: gameState.currentSituationIndex,
+                    situationTitle: situation.title,
+                    playerName: player.name,
+                    playerRole: player.role,
+                    decisionText: option.text,
+                    effect: option.effect
+                });
+
+                // 3. Aplicar efecto al puntaje (en background)
+                gameState.gameScores.libertad += option.effect.libertad;
+                gameState.gameScores.represion += option.effect.represion;
+
+                // 4. Cerrar modal
+                modals.decision.classList.remove('active');
+
+                // 5. Verificar si la ronda terminó
+                if (gameState.decisionsThisRound === gameState.players.length) {
+                    resolveRound();
+                } else {
+                    // Pasar al siguiente turno
+                    gameState.currentPlayerTurn = (gameState.currentPlayerTurn + 1) % gameState.players.length;
+                    updateTurnUI();
+                }
+            }
+
+            function resolveRound() {
+                // Lógica de "actualización silenciosa"
+
+                // 1. Actualizar UI de puntajes
+                updateScoreUI();
+
+                // 2. Pasar a la siguiente situación
+                gameState.currentSituationIndex++;
+                startSituation(); // Esto se encargará de llamar a endGame() si se acaban
+            }
+
+            function updateScoreUI() {
+                const L = gameState.gameScores.libertad;
+                const R = gameState.gameScores.represion;
+
+                // Actualizar valores numéricos
+                libertyScoreValue.textContent = L;
+                repressionScoreValue.textContent = R;
+
+                // Lógica de barras "Tira y Afloja" (según prompt)
+                const total = Math.abs(L) + Math.abs(R);
+                let libertyPct = 50;
+                let repressionPct = 50;
+
+                if (total > 0) {
+                    let netScore = L - R;
+                    let libertyPctOffset = netScore * 2; // Ajustar este multiplicador para sensibilidad
+
+                    libertyPct = 50 + libertyPctOffset;
+
+                    // Limitar entre 0 y 100
+                    libertyPct = Math.max(0, Math.min(100, libertyPct));
+                    repressionPct = 100 - libertyPct;
+                }
+
+                libertyBar.style.width = `${libertyPct}%`;
+                repressionBar.style.width = `${repressionPct}%`;
+            }
+
+            // --- LÓGICA DE GUÍA Y FIN DE JUEGO ---
+
+            showGuideBtn.addEventListener('click', () => modals.guide.classList.add('active'));
+            closeGuideBtn.addEventListener('click', () => modals.guide.classList.remove('active'));
+
+            function endGame() {
+                showScreen(screens.endGame);
+
+                // Mostrar puntajes finales
+                finalLibertyScore.textContent = gameState.gameScores.libertad;
+                finalRepressionScore.textContent = gameState.gameScores.represion;
+
+                // Revelar al agente
+                const agent = gameState.players.find(p => p.role === ROL_AGENTE);
+                if (agent) {
+                    agentReveal.innerHTML = `El Agente infiltrado era <strong>${agent.name}</strong> y operó desde las sombras.`;
+                } else {
+                    agentReveal.innerHTML = `En esta partida no hubo Agente Infiltrado. Las decisiones fueron propias.`;
+                }
+            }
+
+            restartGameBtn.addEventListener('click', () => {
+                // Simplemente recarga la página para reiniciar todo
+                window.location.reload();
+            });
+
+            downloadReportBtn.addEventListener('click', generatePDFReport);
+
+            function generatePDFReport() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.text("Reporte Final: Sombras del Poder", 105, 20, { align: 'center' });
+
+                doc.setFontSize(14);
+                doc.text(`Puntaje Final: Libertad (${gameState.gameScores.libertad}) vs Represión (${gameState.gameScores.represion})`, 105, 30, { align: 'center' });
+
+                // 1. Tabla de Jugadores y Roles
+                doc.setFontSize(16);
+                doc.text("Jugadores y Roles Secretos", 14, 45);
+                const roleData = gameState.players.map(p => [p.name, p.role]);
+                doc.autoTable({
+                    startY: 50,
+                    head: [['Nombre', 'Rol Secreto']],
+                    body: roleData,
+                    theme: 'striped',
+                    headStyles: { fillColor: [255, 193, 7] } // Usar el color acento
+                });
+
+                // 2. Historial detallado de Decisiones
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text("Historial de Decisiones", 14, 20);
+
+                const logData = gameState.decisionLog.map(log => [
+                    log.situationIndex + 1,
+                    log.situationTitle,
+                    log.playerName,
+                    log.decisionText,
+                    `L: ${log.effect.libertad} / R: ${log.effect.represion}`
+                ]);
+
+                doc.autoTable({
+                    startY: 25,
+                    head: [['Ronda', 'Situación', 'Jugador', 'Decisión Tomada', 'Efecto (L/R)']],
+                    body: logData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [43, 48, 58] }, // Usar gris carbón
+                    styles: { fontSize: 9 },
+                    columnStyles: {
+                        1: { cellWidth: 40 },
+                        3: { cellWidth: 60 }
+                    }
+                });
+
+                doc.save('Reporte_Sombras_del_Poder.pdf');
+            }
+
+            // --- FUNCIÓN UTILITARIA ---
+
+            function showScreen(screenToShow) {
+                Object.values(screens).forEach(screen => {
+                    screen.classList.remove('active');
+                    // Usar 'display' en lugar de 'classList' para el contenedor principal del juego
+                    if (screen.id === 'game-screen') {
+                        screen.style.display = 'none';
+                    }
+                });
+
+                screenToShow.classList.add('active');
+                if (screenToShow.id === 'game-screen') {
+                    screenToShow.style.display = 'flex';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Fin de la Edad Media</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a1a;
+            overscroll-behavior-y: none;
+        }
+
+        #mobile-app {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: #fcfbf7;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-heading {
+            font-family: 'Baloo 2', cursive;
+        }
+
+        /* Story Cards */
+        .story-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-bottom: 4px solid #e5e7eb;
+            animation: slideUp 0.5s ease-out;
+            line-height: 1.6;
+        }
+
+        .highlight-box {
+            background-color: #fffbeb;
+            border-left: 4px solid #d97706;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse-btn {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Botones Compactos */
+        .btn-primary {
+            background: linear-gradient(to bottom, #d97706, #b45309);
+            color: white;
+            border: none;
+            border-bottom: 3px solid #78350f;
+            border-radius: 10px;
+            padding: 10px 12px;
+            width: 100%;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+            border-bottom: 1px solid #78350f;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #78350f;
+            border: 2px solid #d97706;
+            border-bottom: 3px solid #d97706;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(2px);
+            border-bottom: 1px solid #d97706;
+        }
+
+        /* Game Options */
+        .option-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-bottom: 4px solid #e5e7eb;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .option-btn.correct {
+            background-color: #86efac;
+            border-color: #166534;
+            color: #064e3b;
+        }
+
+        .option-btn.incorrect {
+            background-color: #fca5a5;
+            border-color: #991b1b;
+            color: #7f1d1d;
+        }
+
+        /* Screens & Layout */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px;
+            /* Space for nav */
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .progress-container {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #fcfbf7;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            padding: 8px 12px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            /* display: none handled inline to avoid overrides */
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="mobile-app">
+
+        <!-- Status Bar -->
+        <div id="status-bar" class="progress-container hidden">
+            <div class="flex items-center">
+                <div
+                    class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold border-2 border-amber-200 mr-3 text-sm">
+                    <span id="level-indicator">1</span>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progress-fill" class="h-full bg-amber-500 w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-amber-100 px-3 py-1 rounded-full text-amber-800 font-bold text-xs flex items-center">
+                <i class="fa-solid fa-star text-yellow-500 mr-1"></i> <span id="score-display">0</span>
+            </div>
+        </div>
+
+        <!-- START SCREEN -->
+        <div id="screen-start" class="screen active justify-center items-center bg-amber-50 text-center !p-0">
+            <div class="w-full h-3/5 relative">
+                <img src="https://files.catbox.moe/nu543v.webp"
+                    class="w-full h-full object-cover grayscale brightness-75" alt="Cover">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-amber-50"></div>
+            </div>
+            <div class="p-8 -mt-20 relative z-10 flex flex-col items-center w-full">
+                <div
+                    class="w-20 h-20 bg-amber-600 rounded-2xl flex items-center justify-center text-4xl text-white shadow-lg mb-4 transform rotate-3">
+                    <i class="fa-brands fa-fort-awesome"></i>
+                </div>
+                <h1 class="text-3xl text-amber-900 mb-2 leading-tight">La Baja Edad Media<br><span
+                        class="text-xl text-amber-700">y el Fin del Mundo Medieval</span></h1>
+                <p class="text-gray-600 mb-8 text-sm">Material interactivo - Nivel básico (1° año)</p>
+
+                <button onclick="startGame()" class="btn-primary animate-[pulse-btn_2s_infinite]">
+                    <i class="fa-solid fa-play mr-2"></i> JUGAR AHORA
+                </button>
+            </div>
+        </div>
+
+        <!-- STORY SCREEN -->
+        <div id="screen-story" class="screen">
+            <div id="story-content" class="pb-10"></div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen bg-gray-50">
+            <div class="text-center mb-4">
+                <span
+                    class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Actividad
+                    Práctica</span>
+                <h2 id="game-title" class="text-xl text-gray-800 mt-2 leading-tight"></h2>
+                <p id="game-instruction" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+            <div id="game-area" class="flex-1 flex flex-col justify-center"></div>
+            <div id="game-feedback" class="hidden mt-4 p-3 rounded-xl text-center font-bold text-sm"></div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="screen-results" class="screen justify-center items-center text-center bg-amber-50">
+            <i class="fa-solid fa-crown text-5xl text-yellow-500 mb-4 drop-shadow-md"></i>
+            <h2 class="text-2xl text-amber-900 mb-2">¡Recorrido Completado!</h2>
+
+            <!-- Nueva Sección: Nota Global Grande -->
+            <div class="mb-6 animate-[pulse-btn_3s_infinite]">
+                <span class="text-xs text-gray-500 uppercase font-bold tracking-widest">Calificación Global</span>
+                <div id="global-grade" class="text-6xl font-black text-amber-600 my-1">0.0</div>
+                <span class="text-gray-400 text-sm font-bold">SOBRE 10</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm w-full mb-4 text-left border border-amber-200">
+                <h3 class="text-md font-bold text-gray-800 mb-3 border-b pb-2">Informe de Desempeño</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between"><span>Secuencia Histórica:</span> <span id="final-score-1"
+                            class="font-bold text-amber-600">0/6</span></div>
+                    <div class="flex justify-between"><span>Verdadero/Falso:</span> <span id="final-score-2"
+                            class="font-bold text-amber-600">0/3</span></div>
+                    <div class="flex justify-between"><span>La Crisis del S.XIV:</span> <span id="final-score-3"
+                            class="font-bold text-amber-600">0/5</span></div>
+                    <div class="flex justify-between pt-2 border-t"><span>Evaluación Final:</span> <span
+                            id="final-score-4" class="font-bold text-green-600">0/10</span></div>
+                </div>
+            </div>
+
+            <!-- Input para Nombre del Alumno -->
+            <div class="w-full mb-4 text-left bg-white p-4 rounded-xl border border-amber-200 shadow-sm">
+                <label class="block text-amber-900 text-sm font-bold mb-2" for="student-name">
+                    <i class="fa-solid fa-user-pen mr-1"></i> Ingresa tu Nombre y Apellido:
+                </label>
+                <input
+                    class="shadow-sm appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500 border-amber-300 transition"
+                    id="student-name" type="text" placeholder="Ej: Juan Pérez">
+                <p id="name-error" class="text-red-500 text-xs italic mt-2 hidden animate-pulse">⚠️ Por favor, escribe
+                    tu nombre para generar el informe.</p>
+            </div>
+
+            <button onclick="downloadPDF()"
+                class="btn-primary bg-gradient-to-b from-red-600 to-red-800 border-red-900 mb-3">
+                <i class="fa-solid fa-file-pdf mr-2"></i> Descargar Informe PDF
+            </button>
+            <button onclick="location.reload()" class="text-gray-500 underline text-xs">Reiniciar Libro</button>
+        </div>
+
+        <!-- Bottom Nav: INLINE DISPLAY NONE TO PREVENT OVERRIDE -->
+        <div id="nav-bar" class="bottom-nav grid grid-cols-2" style="display: none;">
+            <button id="prev-btn" onclick="prevStep()" class="btn-secondary">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Volver
+            </button>
+            <button id="next-btn" onclick="nextStep()" class="btn-primary">
+                Siguiente <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const appState = {
+            step: 0,
+            scores: { g1: 0, g2: 0, g3: 0, final: 0 },
+            userAnswers: [],
+        };
+
+        // CONTENIDO ENRIQUECIDO BASADO EN EL TEXTO ORIGINAL
+        const contentData = [
+            // 0: Galería y Contexto Visual
+            {
+                type: 'story',
+                title: 'Galería: Imágenes de una Época',
+                html: `
+                <div class="flex overflow-x-auto gap-3 mb-4 pb-2 snap-x">
+                    <div class="snap-center shrink-0 w-60 h-40 rounded-xl overflow-hidden shadow relative">
+                        <img src="https://files.catbox.moe/8sri0v.webp" class="w-full h-full object-cover">
+                        <span class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded">Ferias y Mercados</span>
+                    </div>
+                    <div class="snap-center shrink-0 w-60 h-40 rounded-xl overflow-hidden shadow relative">
+                        <img src="https://files.catbox.moe/y9gjcf.webp" class="w-full h-full object-cover">
+                        <span class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded">Ciudades Amuralladas</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 italic text-center mb-4">Desliza para ver más imágenes históricas.</p>
+                <div class="story-card">
+                    <h3 class="text-lg text-amber-900 mb-2 font-bold">Introducción</h3>
+                    <p class="text-gray-700 text-sm">
+                        Bienvenido a la <strong>Baja Edad Media</strong>. Antes de comenzar, observa las imágenes. Notarás que ya no son solo castillos aislados; hay gente reunida, comercio y construcciones urbanas. Esto es clave para entender lo que leerás a continuación.
+                    </p>
+                </div>
+            `
+            },
+            // 1: Capítulo 1 (Texto Completo)
+            {
+                type: 'story',
+                title: 'Capítulo 1: ¿Qué fue la Baja Edad Media?',
+                html: `
+                <div class="story-card border-l-4 border-amber-500">
+                    <h3 class="text-lg text-amber-900 font-bold mb-2">Siglos XI al XIII</h3>
+                    <p class="text-gray-700 text-sm mb-3 text-justify">
+                        La Baja Edad Media fue un período de grandes cambios en Europa. A diferencia de los primeros siglos medievales, donde predominaban los castillos, las aldeas y los señores feudales, durante estos siglos comenzó a crecer la vida urbana y el comercio.
+                    </p>
+                    <div class="highlight-box">
+                        <h4 class="font-bold text-amber-800 mb-1">Características principales:</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                            <li><strong>Crecimiento de las ciudades:</strong> Muchas aldeas se convirtieron en ciudades más grandes donde vivían artesanos, comerciantes y aprendices.</li>
+                            <li><strong>Renacer del comercio:</strong> Aparecieron ferias comerciales famosas, donde se intercambiaban telas, especias, metales y productos agrícolas.</li>
+                            <li><strong>Fortalecimiento de los reyes:</strong> Los monarcas empezaron a recuperar poder frente a los señores feudales.</li>
+                            <li><strong>Mayor producción agrícola:</strong> Nuevas técnicas (como el arado pesado y la rotación de cultivos) permitieron cosechar más alimentos.</li>
+                        </ul>
+                    </div>
+                    <p class="text-gray-700 text-sm mt-3">
+                        <strong>¿Por qué fue un tiempo de cambio?</strong><br>
+                        Porque las personas empezaron a vivir de otra manera: viajaban más, comerciaban, aprendían oficios y se relacionaban con nuevos grupos sociales. Esto transformó la vida medieval.
+                    </p>
+                </div>
+            `
+            },
+            // 2: Juego 1
+            {
+                type: 'game',
+                gameId: 1,
+                title: 'Ordena la Secuencia',
+                instruction: 'Ordena las 6 frases que resumen los eventos del Capítulo 1.'
+            },
+            // 3: Capítulo 2 (Texto Completo)
+            {
+                type: 'story',
+                title: 'Capítulo 2: Ciudades y Comercio',
+                html: `
+                <div class="relative h-32 rounded-xl overflow-hidden mb-4 shadow-md">
+                    <img src="https://files.catbox.moe/y31nk1.webp" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+                        <span class="text-white font-bold text-sm">Artesanos trabajando</span>
+                    </div>
+                </div>
+                <div class="story-card border-l-4 border-purple-500">
+                    <p class="text-gray-700 text-sm mb-3">
+                        Las ciudades medievales —muchas amuralladas— se convirtieron en espacios muy activos. Allí aparecieron los <strong>gremios</strong>, grupos que organizaban a los artesanos de un mismo oficio (panaderos, herreros, carpinteros, tejedores).
+                    </p>
+                    <div class="highlight-box bg-purple-50 border-purple-500">
+                        <h4 class="font-bold text-purple-900 mb-1">Los Gremios:</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-700">
+                            <li>Establecían normas de trabajo.</li>
+                            <li>Regulaban los precios y la calidad de los productos.</li>
+                            <li>Formaban a los aprendices.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <h4 class="font-bold text-gray-800 mb-2">Nuevos grupos sociales</h4>
+                    <ul class="text-sm text-gray-700 space-y-2 mb-3">
+                        <li>💰 <strong>Burgueses:</strong> comerciantes, artesanos acomodados y banqueros.</li>
+                        <li>🛠️ <strong>Pobres urbanos:</strong> trabajadores sin oficio estable, mendigos, jornaleros.</li>
+                    </ul>
+                    <p class="text-gray-700 text-sm italic border-t pt-2">
+                        Aunque seguía existiendo el feudalismo, en las ciudades surgieron nuevas ideas: la búsqueda de libertad, la importancia del dinero y del intercambio, la movilidad social. Esto preparó el terreno para el fin de la Edad Media.
+                    </p>
+                </div>
+            `
+            },
+            // 4: Juego 2
+            {
+                type: 'game',
+                gameId: 2,
+                title: 'Verdadero o Falso',
+                instruction: 'Selecciona si la afirmación es correcta según el texto.'
+            },
+            // 5: Capítulo 3 (Texto Completo)
+            {
+                type: 'story',
+                title: 'Capítulo 3: La Crisis del Siglo XIV',
+                html: `
+                <div class="relative h-32 rounded-xl overflow-hidden mb-4 shadow-md">
+                    <img src="https://files.catbox.moe/rbfkyj.webp" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+                        <span class="text-white font-bold text-sm">Tiempos de Crisis</span>
+                    </div>
+                </div>
+                <div class="story-card border-l-4 border-red-600">
+                    <p class="text-gray-700 text-sm mb-3">
+                        A comienzos del siglo XIV, Europa entró en una de las peores crisis de su historia. Varias causas se combinaron para destruir el crecimiento de los siglos anteriores.
+                    </p>
+                    
+                    <h4 class="font-bold text-red-800 mb-1">1. La Hambruna</h4>
+                    <p class="text-sm text-gray-700 mb-3">Entre <strong>1315 y 1317</strong> las cosechas fallaron por cambios climáticos. Miles de personas no tuvieron alimento suficiente.</p>
+
+                    <h4 class="font-bold text-red-800 mb-1">2. La Peste Negra (1347–1352)</h4>
+                    <p class="text-sm text-gray-700 mb-3">Una epidemia devastadora, transmitida por pulgas que viajaban en barcos y caravanas.</p>
+                    <ul class="list-disc list-inside text-sm text-gray-700 mb-3 ml-2">
+                        <li>Mató a cerca de un tercio de la población europea.</li>
+                        <li>Muchos pueblos quedaron casi vacíos.</li>
+                        <li>La mano de obra escaseaba, lo que provocó conflictos entre campesinos y señores.</li>
+                    </ul>
+
+                    <h4 class="font-bold text-red-800 mb-1">3. Guerras</h4>
+                    <p class="text-sm text-gray-700 mb-3">Como la <strong>Guerra de los Cien Años</strong> entre Francia e Inglaterra. Estas guerras destruyeron campos, ciudades y rutas comerciales.</p>
+                </div>
+
+                <div class="story-card bg-gray-50">
+                    <h4 class="font-bold text-gray-800 mb-2">Consecuencias sociales</h4>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                        <li>Crisis del sistema feudal (siervos exigen mejoras).</li>
+                        <li>Rebeliones campesinas y urbanas.</li>
+                        <li>Disminución del poder de los señores y crecimiento de la autoridad real.</li>
+                        <li>Cambios en las ideas sobre la vida y la muerte.</li>
+                    </ul>
+                </div>
+            `
+            },
+            // 6: Juego 3
+            {
+                type: 'game',
+                gameId: 3,
+                title: 'Multiple Choice',
+                instruction: 'Responde correctamente sobre la Crisis del Siglo XIV.'
+            },
+            // 7: Capítulo 4 (Texto Completo)
+            {
+                type: 'story',
+                title: 'Capítulo 4: Fin de la Edad Media',
+                html: `
+                <div class="relative h-32 rounded-xl overflow-hidden mb-4 shadow-md">
+                    <img src="https://files.catbox.moe/kkamvm.webp" class="w-full h-full object-cover object-top">
+                    <div class="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent flex items-end p-3">
+                        <span class="text-white font-bold text-sm">Exploración y Nuevos Horizontes</span>
+                    </div>
+                </div>
+                <div class="story-card border-l-4 border-blue-500">
+                    <p class="text-gray-700 text-sm mb-3">
+                        El mundo medieval entró en transformación profunda. Entre los siglos XIV y XV ocurrieron procesos que marcaron el final de la Edad Media e inicio de la Modernidad.
+                    </p>
+                    <div class="highlight-box bg-blue-50 border-blue-500">
+                        <h4 class="font-bold text-blue-900 mb-1">Factores del cambio:</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-700">
+                            <li>Recuperación económica después de la peste.</li>
+                            <li>Fortalecimiento de las monarquías y formación de los <strong>Estados modernos</strong> (España, Francia, Portugal).</li>
+                            <li><strong>Renacimiento cultural:</strong> búsqueda del saber, arte y ciencia.</li>
+                            <li>Expansión europea por nuevos territorios (viajes de exploración del siglo XV).</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="story-card">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <h4 class="font-bold text-red-700 border-b border-red-200 mb-1">¿Qué terminó?</h4>
+                            <ul class="text-xs text-gray-600 list-disc list-inside">
+                                <li>La sociedad dejó de ser solo señores y siervos.</li>
+                                <li>El comercio/dinero superó a la tierra como riqueza.</li>
+                                <li>La Iglesia perdió parte de su autoridad.</li>
+                                <li>Las ciudades crecieron más que los castillos.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-green-700 border-b border-green-200 mb-1">¿Qué comenzó? (Edad Moderna)</h4>
+                            <ul class="text-xs text-gray-600 list-disc list-inside">
+                                <li>Estados centralizados.</li>
+                                <li>Comercio internacional.</li>
+                                <li>Innovaciones científicas.</li>
+                                <li>Nuevas clases sociales (burguesía).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `
+            },
+            // 8: Examen Final
+            {
+                type: 'game',
+                gameId: 4,
+                title: 'Evaluación Final',
+                instruction: 'Responde 5 preguntas para evaluar tu comprensión global.'
+            }
+        ];
+
+        // LÓGICA DEL JUEGO
+        function startGame() {
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('status-bar').classList.remove('hidden');
+            document.getElementById('nav-bar').style.display = 'grid'; // Esto restaurará la grilla cuando el juego comience
+            loadStep(0);
+        }
+
+        function loadStep(index) {
+            appState.step = index;
+
+            // Barra de progreso
+            const progressPercent = ((index + 1) / contentData.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+            document.getElementById('level-indicator').innerText = index + 1;
+
+            const data = contentData[index];
+            const storyScreen = document.getElementById('screen-story');
+            const gameScreen = document.getElementById('screen-game');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+
+            storyScreen.classList.remove('active');
+            gameScreen.classList.remove('active');
+            document.getElementById('screen-results').classList.remove('active');
+
+            // Control de botón "Volver"
+            prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
+
+            if (data.type === 'story') {
+                storyScreen.classList.add('active');
+                storyScreen.scrollTop = 0;
+                document.getElementById('story-content').innerHTML = `
+                <h2 class="text-xl text-gray-800 font-heading mb-3 px-1 border-b-2 border-amber-200 pb-2">${data.title}</h2>
+                ${data.html}
+            `;
+                nextBtn.innerHTML = `Siguiente <i class="fa-solid fa-arrow-right ml-1"></i>`;
+                nextBtn.onclick = nextStep;
+                nextBtn.classList.remove('hidden');
+            }
+            else if (data.type === 'game') {
+                gameScreen.classList.add('active');
+                document.getElementById('game-title').innerText = data.title;
+                document.getElementById('game-instruction').innerText = data.instruction;
+                document.getElementById('game-feedback').classList.add('hidden');
+                nextBtn.classList.add('hidden'); // Ocultar siguiente hasta completar
+
+                initGame(data.gameId);
+            }
+        }
+
+        function nextStep() {
+            if (appState.step < contentData.length - 1) loadStep(appState.step + 1);
+            else showResults();
+        }
+
+        function prevStep() {
+            if (appState.step > 0) loadStep(appState.step - 1);
+        }
+
+        function initGame(id) {
+            const container = document.getElementById('game-area');
+            container.innerHTML = '';
+
+            // JUEGO 1: Secuencia (Texto Capitulo 1)
+            if (id === 1) {
+                // Frases tomadas exactamente del resumen del Capitulo 1
+                const items = [
+                    { txt: "1. Crecimiento de las ciudades", correctIndex: 0 },
+                    { txt: "2. Renacer del comercio", correctIndex: 1 },
+                    { txt: "3. Fortalecimiento de los reyes", correctIndex: 2 },
+                    { txt: "4. Mayor producción agrícola", correctIndex: 3 },
+                    { txt: "5. Personas viajan más", correctIndex: 4 },
+                    { txt: "6. Transformación vida medieval", correctIndex: 5 }
+                ];
+                let shuffled = [...items].sort(() => Math.random() - 0.5);
+                let currentSeq = 0;
+
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 gap-2 px-2';
+
+                shuffled.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn text-center';
+                    btn.innerText = item.txt.substring(3); // Mostrar solo texto
+                    btn.onclick = () => {
+                        if (item.correctIndex === currentSeq) {
+                            btn.classList.add('correct');
+                            btn.disabled = true;
+                            btn.innerHTML = `<i class="fa-solid fa-check mr-2"></i> ${btn.innerText}`;
+                            currentSeq++;
+                            appState.scores.g1++;
+                            updateScore(10);
+                            if (currentSeq === 6) gameComplete('g1', 6);
+                        } else {
+                            btn.classList.add('incorrect');
+                            setTimeout(() => btn.classList.remove('incorrect'), 500);
+                        }
+                    };
+                    grid.appendChild(btn);
+                });
+                container.appendChild(grid);
+            }
+            // JUEGO 2: Verdadero o Falso (Texto Capitulo 2)
+            else if (id === 2) {
+                const questions = [
+                    {
+                        q: "Los gremios agrupaban artesanos de distintos oficios juntos.",
+                        a: false,
+                        fb: "Falso. Los gremios organizaban a los artesanos de un MISMO oficio."
+                    },
+                    {
+                        q: "Los burgueses eran comerciantes y artesanos acomodados.",
+                        a: true,
+                        fb: "¡Correcto! Eran una nueva clase social rica que vivía en los burgos."
+                    },
+                    {
+                        q: "En las ciudades surgieron ideas sobre la libertad y el intercambio.",
+                        a: true,
+                        fb: "¡Correcto! Se decía que 'el aire de la ciudad hace libre' frente al feudalismo."
+                    }
+                ];
+                renderMiniQuiz(questions, 'g2', container, 20);
+            }
+            // JUEGO 3: Multiple Choice (Texto Capitulo 3)
+            else if (id === 3) {
+                const questions = [
+                    {
+                        q: "¿Qué causó la hambruna de 1315-1317?",
+                        opts: ["Guerras", "Cambios climáticos", "Peste"],
+                        a: 1,
+                        fb: "El cambio climático arruinó las cosechas, provocando falta de alimentos."
+                    },
+                    {
+                        q: "¿Cómo se transmitía la Peste Negra?",
+                        opts: ["Por el aire", "Por el agua", "Por pulgas de ratas"],
+                        a: 2,
+                        fb: "La enfermedad viajaba en las pulgas de las ratas en barcos y caravanas."
+                    },
+                    {
+                        q: "¿Qué países lucharon en la Guerra de los Cien Años?",
+                        opts: ["España y Portugal", "Francia e Inglaterra", "Italia y Alemania"],
+                        a: 1,
+                        fb: "Fue un conflicto largo y destructivo entre Francia e Inglaterra."
+                    },
+                    {
+                        q: "La peste provocó que la mano de obra:",
+                        opts: ["Aumentara", "Escaseara", "No cambiara"],
+                        a: 1,
+                        fb: "Al morir tanta gente, faltaban trabajadores en los campos."
+                    },
+                    {
+                        q: "Una consecuencia social fue:",
+                        opts: ["Menos poder para los señores", "Más castillos", "Paz absoluta"],
+                        a: 0,
+                        fb: "Los señores feudales perdieron poder frente a los Reyes y las revueltas."
+                    }
+                ];
+                renderQuizList(questions, 'g3', container, 20);
+            }
+            // JUEGO 4: Examen Final (Global)
+            else if (id === 4) {
+                const questions = [
+                    {
+                        q: "¿Qué tipo de Estados comenzaron a formarse?",
+                        opts: ["Ciudades-Estado", "Estados Modernos Centralizados", "Imperios Feudales"],
+                        a: 1,
+                        fb: "Las monarquías se fortalecieron creando Estados nacionales modernos."
+                    },
+                    {
+                        q: "¿Qué nueva clase social ganó importancia económica?",
+                        opts: ["La Burguesía", "El Clero", "La Nobleza"],
+                        a: 0,
+                        fb: "La burguesía (comerciantes y banqueros) ganó mucho poder económico."
+                    },
+                    {
+                        q: "¿Qué reemplazó a la tierra como principal riqueza?",
+                        opts: ["El ganado", "El dinero y comercio", "Las armas"],
+                        a: 1,
+                        fb: "El dinero y el comercio se volvieron más importantes que la posesión de tierras."
+                    },
+                    {
+                        q: "¿Dónde se intercambiaban productos en el renacer comercial?",
+                        opts: ["En los castillos", "En ferias comerciales", "En las iglesias"],
+                        a: 1,
+                        fb: "Las ferias eran grandes eventos de intercambio regional."
+                    },
+                    {
+                        q: "¿Qué etapa histórica comenzó tras estos cambios?",
+                        opts: ["Edad Antigua", "Edad Moderna", "Edad Contemporánea"],
+                        a: 1,
+                        fb: "El fin de la Edad Media dio paso al inicio de la Edad Moderna."
+                    }
+                ];
+                renderQuizList(questions, 'final', container, 50, true);
+            }
+        }
+
+        // Renderizador genérico para V/F paso a paso
+        function renderMiniQuiz(questions, scoreKey, container, points) {
+            let qIdx = 0;
+            function show() {
+                // Ocultar feedback anterior al mostrar nueva pregunta
+                document.getElementById('game-feedback').classList.add('hidden');
+
+                if (qIdx >= questions.length) return gameComplete(scoreKey, appState.scores[scoreKey]);
+                const q = questions[qIdx];
+                container.innerHTML = `
+                <div class="bg-white p-5 rounded-xl shadow mx-2 text-center animate-[slideUp_0.3s_ease-out]">
+                    <p class="text-md font-bold text-gray-800 mb-4">${q.q}</p>
+                    <div class="flex gap-2">
+                        <button id="btn-t" class="btn-primary bg-green-600 border-green-800">Verdadero</button>
+                        <button id="btn-f" class="btn-primary bg-red-600 border-red-800">Falso</button>
+                    </div>
+                </div>
+            `;
+
+                const btnT = document.getElementById('btn-t');
+                const btnF = document.getElementById('btn-f');
+
+                btnT.onclick = () => check(true);
+                btnF.onclick = () => check(false);
+
+                function check(val) {
+                    // 1. DESACTIVAR BOTONES INMEDIATAMENTE PARA EVITAR DOBLE CLIC
+                    btnT.disabled = true;
+                    btnF.disabled = true;
+                    btnT.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnF.classList.add('opacity-50', 'cursor-not-allowed');
+
+                    const isCorrect = (val === q.a);
+                    if (isCorrect) {
+                        appState.scores[scoreKey]++;
+                        updateScore(points);
+                        showFeedback(true, "¡Correcto! " + (q.fb || ""));
+                    } else {
+                        showFeedback(false, "Incorrecto. " + (q.fb || ""));
+                    }
+                    setTimeout(() => { qIdx++; show(); }, 2500); // 2.5s para leer feedback
+                }
+            }
+            show();
+        }
+
+        // Renderizador genérico para Multiple Choice
+        function renderQuizList(questions, scoreKey, container, points, isFinal = false) {
+            let qIdx = 0;
+            function show() {
+                // Ocultar feedback anterior al mostrar nueva pregunta
+                document.getElementById('game-feedback').classList.add('hidden');
+
+                if (qIdx >= questions.length) return gameComplete(scoreKey, appState.scores[scoreKey]);
+                const q = questions[qIdx];
+                container.innerHTML = `
+                <div class="bg-white p-5 rounded-xl shadow mx-2 animate-[slideUp_0.3s_ease-out]">
+                    <div class="text-xs text-gray-400 mb-2 uppercase font-bold">Pregunta ${qIdx + 1}/${questions.length}</div>
+                    <p class="text-md font-bold text-gray-800 mb-4">${q.q}</p>
+                    <div id="opts-list" class="space-y-2"></div>
+                </div>
+            `;
+                const list = document.getElementById('opts-list');
+                q.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn text-sm p-3';
+                    btn.innerText = opt;
+                    btn.onclick = () => {
+                        // SEGURIDAD EXTRA: Evitar clics si ya está deshabilitado
+                        if (btn.disabled) return;
+
+                        // Desactivar todos los botones inmediatamente
+                        const all = list.querySelectorAll('button');
+                        all.forEach(b => {
+                            b.disabled = true;
+                            b.classList.add('cursor-not-allowed');
+                        });
+
+                        const isCorrect = (idx === q.a);
+
+                        if (isFinal) {
+                            appState.userAnswers.push({ question: q.q, answer: opt, correct: isCorrect, correctAnswer: q.opts[q.a] });
+                        }
+
+                        if (isCorrect) {
+                            btn.classList.add('correct');
+                            appState.scores[scoreKey]++;
+                            updateScore(points);
+                            showFeedback(true, "¡Bien! " + (q.fb || ""));
+                        } else {
+                            btn.classList.add('incorrect');
+                            all[q.a].classList.add('correct'); // Mostrar la correcta
+                            showFeedback(false, "Incorrecto. " + (q.fb || ""));
+                        }
+                        setTimeout(() => { qIdx++; show(); }, 2500); // 2.5s para leer feedback
+                    };
+                    list.appendChild(btn);
+                });
+            }
+            show();
+        }
+
+        function showFeedback(success, text) {
+            const fb = document.getElementById('game-feedback');
+            fb.innerText = text;
+            fb.className = `mt-4 mx-4 p-3 rounded-lg text-center font-bold text-white text-sm animate-bounce ${success ? 'bg-green-500' : 'bg-red-500'}`;
+            fb.classList.remove('hidden');
+        }
+
+        function gameComplete(key, score) {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            const container = document.getElementById('game-area');
+            container.innerHTML = `
+            <div class="text-center p-6 bg-white rounded-xl shadow mx-4">
+                <i class="fa-solid fa-star text-4xl text-yellow-400 mb-3 animate-spin-slow"></i>
+                <h3 class="text-xl font-bold text-amber-900 mb-1">¡Actividad Completada!</h3>
+                <p class="text-gray-600 mb-4 text-sm">Puntuación: ${score}</p>
+                <button onclick="nextStep()" class="btn-primary w-full">Continuar</button>
+            </div>
+        `;
+            document.getElementById('game-instruction').innerText = "";
+            document.getElementById('game-feedback').classList.add('hidden');
+        }
+
+        function updateScore(pts) {
+            const el = document.getElementById('score-display');
+            el.innerText = parseInt(el.innerText) + pts;
+            el.parentElement.classList.add('scale-110');
+            setTimeout(() => el.parentElement.classList.remove('scale-110'), 200);
+        }
+
+        function showResults() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-story').classList.remove('active');
+            document.getElementById('status-bar').classList.add('hidden');
+            document.getElementById('nav-bar').style.display = 'none';
+
+            document.getElementById('screen-results').classList.add('active');
+
+            // Cálculos de Notas
+            const examScore10 = appState.scores.final * 2; // Escala de 5 a 10
+
+            // Cálculo de Nota Global (Todos los ítems)
+            // Total ítems: 6 (G1) + 3 (G2) + 5 (G3) + 5 (Final) = 19 puntos totales posibles
+            const totalItems = 19;
+            const totalHits = appState.scores.g1 + appState.scores.g2 + appState.scores.g3 + appState.scores.final;
+            const globalGrade = (totalHits / totalItems) * 10;
+            const formattedGrade = globalGrade.toFixed(1); // Ej: 8.5
+
+            // Actualizar DOM
+            const gradeEl = document.getElementById('global-grade');
+            gradeEl.innerText = formattedGrade;
+
+            // Color según nota
+            if (globalGrade >= 7) gradeEl.className = "text-6xl font-black text-green-600 my-1";
+            else if (globalGrade >= 4) gradeEl.className = "text-6xl font-black text-amber-600 my-1";
+            else gradeEl.className = "text-6xl font-black text-red-600 my-1";
+
+            document.getElementById('final-score-1').innerText = `${appState.scores.g1}/6`;
+            document.getElementById('final-score-2').innerText = `${appState.scores.g2}/3`;
+            document.getElementById('final-score-3').innerText = `${appState.scores.g3}/5`;
+            // Mostrar examen final sobre 10
+            document.getElementById('final-score-4').innerText = `${examScore10}/10`;
+        }
+
+        function downloadPDF() {
+            // Validación del nombre
+            const nameInput = document.getElementById('student-name');
+            const nameError = document.getElementById('name-error');
+            const studentName = nameInput.value.trim();
+
+            if (!studentName) {
+                nameError.classList.remove('hidden');
+                nameInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                nameInput.focus();
+                return; // Detiene la descarga si no hay nombre
+            } else {
+                nameError.classList.add('hidden');
+                nameInput.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+            }
+
+            // Recalcular para PDF
+            const examScore10 = appState.scores.final * 2;
+            const totalItems = 19;
+            const totalHits = appState.scores.g1 + appState.scores.g2 + appState.scores.g3 + appState.scores.final;
+            const globalGrade = ((totalHits / totalItems) * 10).toFixed(1);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Título
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(217, 119, 6); // Amber color
+            doc.setFontSize(18);
+            doc.text("Informe: El Fin de la Edad Media", 105, 20, null, null, "center");
+
+            // Datos del Alumno y Nota Grande
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Alumno/a: ${studentName}`, 20, 35);
+
+            // Nota destacada a la derecha
+            doc.setFontSize(16);
+            doc.setTextColor(50, 50, 50);
+            doc.text(`Nota Global: ${globalGrade} / 10`, 190, 35, null, null, "right");
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 42);
+
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 47, 190, 47);
+
+            // Resumen
+            doc.setFont("helvetica", "bold");
+            doc.text("Resumen de Actividades:", 20, 60);
+            doc.setFont("helvetica", "normal");
+            doc.text(`• Ordenar Secuencia: ${appState.scores.g1}/6`, 30, 70);
+            doc.text(`• Verdadero/Falso: ${appState.scores.g2}/3`, 30, 80);
+            doc.text(`• Crisis S.XIV: ${appState.scores.g3}/5`, 30, 90);
+            // Examen final sobre 10 en el PDF también
+            doc.text(`• Evaluación Final: ${examScore10}/10`, 30, 100);
+
+            // Detalles
+            doc.setFont("helvetica", "bold");
+            doc.text("Detalle Examen Final:", 20, 120);
+
+            let y = 130;
+            doc.setFontSize(10);
+
+            appState.userAnswers.forEach((ans, i) => {
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFont("helvetica", "bold");
+                doc.text(`${i + 1}. ${ans.question}`, 20, y);
+                y += 5;
+                doc.setFont("helvetica", "normal");
+                if (ans.correct) {
+                    doc.setTextColor(0, 128, 0);
+                    doc.text(`Respuesta: ${ans.answer} (Correcto)`, 20, y);
+                } else {
+                    doc.setTextColor(200, 0, 0);
+                    doc.text(`Respuesta: ${ans.answer} (Incorrecto)`, 20, y);
+                    doc.setTextColor(100, 100, 100);
+                    y += 5;
+                    doc.text(`Correcta: ${ans.correctAnswer}`, 20, y);
+                }
+                doc.setTextColor(0, 0, 0);
+                y += 10;
+            });
+
+            // Nombre del archivo personalizado
+            const safeName = studentName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            doc.save(`Informe_Edad_Media_${safeName}.pdf`);
+        }
+    </script>
+</body>
+
+</html>

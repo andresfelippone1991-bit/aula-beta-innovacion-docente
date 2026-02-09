@@ -1,0 +1,926 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Cordobazo - Libro Gamificado</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Baloo+2:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- jsPDF para el informe -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        // Configuración de Tailwind para usar las fuentes y colores
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                        'serif': ['Baloo 2', 'cursive'],
+                    },
+                    colors: {
+                        'cream': '#FDF5E6',
+                        'primary': '#007BFF', // Azul
+                        'secondary': '#FFA500', // Naranja
+                        'accent': '#28A745', // Verde
+                        'text-dark': '#333333',
+                        'correct': '#28A745', // Verde para correcto
+                        'incorrect': '#DC3545', // Rojo para incorrecto
+                    },
+                    boxShadow: {
+                        'inner-top': '0 -4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos para las páginas y transiciones */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos para los juegos */
+        .game-option {
+            transition: all 0.2s;
+        }
+
+        .game-option:hover {
+            transform: scale(1.03);
+        }
+
+        .feedback {
+            display: none;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .correct-feedback {
+            color: #28A745;
+        }
+
+        .incorrect-feedback {
+            color: #DC3545;
+        }
+
+        /* Estilos para el juego 1 (Ordenar) */
+        .slot {
+            height: 50px;
+            border-style: dashed;
+        }
+
+        .option-btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="bg-cream font-sans text-text-dark">
+
+    <div class="container mx-auto max-w-3xl p-4 min-h-screen pb-24">
+        <!-- Contenedor principal de la aplicación -->
+        <div id="app-container" class="bg-white rounded-lg shadow-xl p-6 md:p-10 relative overflow-hidden">
+
+            <!-- Página 0: Inicio -->
+            <div id="page-0" class="page active text-center">
+                <h1 class="text-4xl md:text-5xl font-serif text-primary mb-4">El Cordobazo</h1>
+                <p class="text-lg md:text-xl mb-8">Un libro gamificado para explorar la historia.</p>
+                <img src="https://files.catbox.moe/gtxvcx.png" alt="Ilustración de protesta"
+                    class="rounded-lg shadow-md mx-auto mb-8 w-full max-w-md"
+                    onerror="this.src='https://placehold.co/600x400/FFA500/FFFFFF?text=El+Cordobazo'; this.onerror=null;">
+                <button id="start-btn"
+                    class="w-full bg-accent text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg hover:bg-green-700 transition duration-300">
+                    Comenzar Aventura
+                </button>
+            </div>
+
+            <!-- Página 1: Galería de Imágenes -->
+            <div id="page-1" class="page">
+                <h2 class="text-3xl font-serif text-primary mb-6 text-center">Galería de Imágenes</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <img src="https://files.catbox.moe/wqix7u.png" alt="Foto histórica 1"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+1'; this.onerror=null;">
+                    <img src="https://files.catbox.moe/asv31i.png" alt="Foto histórica 2"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+2'; this.onerror=null;">
+                    <img src="https://files.catbox.moe/ylfujx.jpg" alt="Foto histórica 3"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+3'; this.onerror=null;">
+                    <img src="https://files.catbox.moe/rynusg.jpg" alt="Foto histórica 4"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+4'; this.onerror=null;">
+                    <img src="https://files.catbox.moe/gtxvcx.png" alt="Foto histórica 5"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+5'; this.onerror=null;">
+                    <img src="https://files.catbox.moe/aifqww.jpg" alt="Foto histórica 6"
+                        class="rounded-lg shadow-md w-full h-auto object-cover"
+                        onerror="this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Imagen+6'; this.onerror=null;">
+                </div>
+            </div>
+
+            <!-- Página 2: Capítulo 1 -->
+            <div id="page-2" class="page">
+                <h2 class="text-3xl font-serif text-primary mb-4">Capítulo 1: La Chispa</h2>
+                <div class="prose max-w-none text-lg leading-relaxed">
+                    <audio controls class="w-full my-4">
+                        <source src="https://files.catbox.moe/zq2ots.mp3" type="audio/mpeg">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+                    <p>En mayo de 1969, el Poder Ejecutivo nacional dictó un decreto por el cual se derogaron los
+                        regímenes especiales sobre el descanso del sábado inglés en Mendoza, San Juan, Tucumán y
+                        Córdoba. También se anunció el congelamiento de los convenios colectivos y de los salarios. En
+                        Córdoba, las regionales de SMATA —el Sindicato de los Mecánicos de Automotores y Transportes de
+                        la Argentina, conducido por Elpidio Torres—, de Luz y Fuerza —cuyo secretario regional era
+                        Agustín Tosco— y la Unión Tranviarios Automotor —UTA, liderada por Atilio López— convocaron a
+                        una asamblea general. Las conducciones de estos tres sindicatos, cuyos trabajadores recibían los
+                        salarios más altos del país, lideraron la protesta. La sesión de esa jornada terminó con un
+                        enfrentamiento con la policía y un llamado al paro general.</p>
+                </div>
+            </div>
+
+            <!-- Página 3: Juego 1 (Ordenar Secuencia) -->
+            <div id="page-3" class="page">
+                <h2 class="text-3xl font-serif text-secondary mb-4">Juego 1: Ordena la Secuencia</h2>
+                <p class="mb-6">Haz clic en los eventos para colocarlos en el orden cronológico correcto según el
+                    Capítulo 1.</p>
+
+                <!-- Slots para ordenar -->
+                <div id="game1-slots" class="space-y-2 mb-4">
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">1.</div>
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">2.</div>
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">3.</div>
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">4.</div>
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">5.</div>
+                    <div class="slot border-2 border-gray-300 rounded-lg p-3 text-gray-500 text-center">6.</div>
+                </div>
+
+                <!-- Opciones -->
+                <div id="game1-options" class="flex flex-wrap gap-2 mb-4">
+                    <!-- Las opciones se generarán con JS -->
+                </div>
+
+                <div class="flex space-x-2">
+                    <button id="game1-reset"
+                        class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition">Reiniciar</button>
+                    <button id="game1-check"
+                        class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">Comprobar</button>
+                </div>
+                <div id="game1-feedback" class="feedback mt-4 font-bold"></div>
+            </div>
+
+            <!-- Página 4: Capítulo 2 -->
+            <div id="page-4" class="page">
+                <h2 class="text-3xl font-serif text-primary mb-4">Capítulo 2: La Marcha y la Represión</h2>
+                <div class="prose max-w-none text-lg leading-relaxed">
+                    <audio controls class="w-full my-4">
+                        <source src="https://files.catbox.moe/v61dst.mp3" type="audio/mpeg">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+                    <p>El 29 de mayo, obreros y estudiantes marcharon unidos por las calles de Córdoba. Ante la magnitud
+                        de la movilización, Onganía ordenó que las Fuerzas Armadas se hicieran cargo de la represión.
+                        Como resultado de los enfrentamientos hubo presos, decenas de heridos y 16 muertos, algunos
+                        ajenos a las manifestaciones. Entre los muertos por la represión se encontraron el estudiante
+                        Daniel Octavio Castellanos y el obrero mecánico Máximo Mena.</p>
+                    <p>La protesta se extendió a otras provincias. Rosario fue declarada zona de emergencia y colocada
+                        bajo jurisdicción militar. También se profundizaron los conflictos en la provincia de Tucumán.
+                        El Cordobazo fue el inicio de un proceso de agudización de la protesta social y la lucha armada
+                        que, desde entonces y por varios años, se desarrolló en la sociedad argentina.</p>
+                </div>
+            </div>
+
+            <!-- Página 5: Juego 2 (Verdadero/Falso) -->
+            <div id="page-5" class="page">
+                <h2 class="text-3xl font-serif text-secondary mb-4">Juego 2: ¿Verdadero o Falso?</h2>
+                <p class="mb-6">Lee las siguientes afirmaciones sobre el Capítulo 2 y decide si son verdaderas o falsas.
+                </p>
+
+                <div id="game2-questions" class="space-y-6">
+                    <!-- Pregunta 1 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">1. El 29 de mayo, obreros y estudiantes marcharon por
+                            separado.</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q1" value="f" class="mr-2">
+                                Falso</label>
+                            <label class="flex items-center"><input type="radio" name="q1" value="v" class="mr-2">
+                                Verdadero</label>
+                        </div>
+                        <div class="feedback" data-correct="f">
+                            <span class="correct-feedback">¡Correcto! Marcharon unidos.</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es Falso, marcharon
+                                unidos.</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 2 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">2. Onganía ordenó a las Fuerzas Armadas reprimir.</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q2" value="f" class="mr-2">
+                                Falso</label>
+                            <label class="flex items-center"><input type="radio" name="q2" value="v" class="mr-2">
+                                Verdadero</label>
+                        </div>
+                        <div class="feedback" data-correct="v">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es Verdadero.</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 3 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">3. Máximo Mena y Daniel Castellanos fueron los únicos muertos.
+                        </p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q3" value="f" class="mr-2">
+                                Falso</label>
+                            <label class="flex items-center"><input type="radio" name="q3" value="v" class="mr-2">
+                                Verdadero</label>
+                        </div>
+                        <div class="feedback" data-correct="f">
+                            <span class="correct-feedback">¡Correcto! Hubo 16 muertos; ellos estaban *entre* los
+                                muertos.</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es Falso. Hubo 16 muertos
+                                en total.</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 4 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">4. La protesta se limitó únicamente a la ciudad de Córdoba.
+                        </p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q4" value="f" class="mr-2">
+                                Falso</label>
+                            <label class="flex items-center"><input type="radio" name="q4" value="v" class="mr-2">
+                                Verdadero</label>
+                        </div>
+                        <div class="feedback" data-correct="f">
+                            <span class="correct-feedback">¡Correcto! Se extendió a otras provincias como Rosario y
+                                Tucumán.</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es Falso, se extendió a
+                                otras provincias.</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 5 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">5. Rosario fue declarada zona de emergencia.</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center"><input type="radio" name="q5" value="f" class="mr-2">
+                                Falso</label>
+                            <label class="flex items-center"><input type="radio" name="q5" value="v" class="mr-2">
+                                Verdadero</label>
+                        </div>
+                        <div class="feedback" data-correct="v">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es Verdadero.</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="game2-check"
+                    class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition mt-6">Comprobar
+                </button>
+            </div>
+
+            <!-- Página 6: Capítulo 3 -->
+            <div id="page-6" class="page">
+                <h2 class="text-3xl font-serif text-primary mb-4">Capítulo 3: Las Primeras Reacciones</h2>
+                <div class="prose max-w-none text-lg leading-relaxed">
+                    <audio controls class="w-full my-4">
+                        <source src="https://files.catbox.moe/pfocqx.mp3" type="audio/mpeg">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+                    <p>Después del Cordobazo, tanto la Confederación General Económica (CGE) como la CGT propusieron la
+                        sustitución de Krieger Vasena. Ambas entidades entendían que las movilizaciones populares, que
+                        se habían extendido en todo el país después del Cordobazo, podían servir como elemento para
+                        presionar al gobierno y lograr cambios en la orientación de las políticas que favorecieran sus
+                        intereses. Pero no estaban de acuerdo con la estrategia de violencia social que había
+                        caracterizado a las jornadas del Cordobazo.</p>
+                    <p>Los principales medios periodísticos y amplios sectores de la gran burguesía industrial tenían
+                        una lectura diferente de la situación. Desde el punto de vista de estos sectores, los
+                        acontecimientos ocurridos en el interior fueron el resultado de la falta de autoridad del
+                        gobierno frente a lo que entendían era el avance del comunismo internacional. Criticaron que el
+                        gobierno no hubiera desmantelado la capacidad de organización de los sindicatos y que no hubiera
+                        ordenado reprimir con mayor dureza los desbordes sociales.</p>
+                </div>
+            </div>
+
+            <!-- Página 7: Juego 3 (Multiple Choice) -->
+            <div id="page-7" class="page">
+                <h2 class="text-3xl font-serif text-secondary mb-4">Juego 3: Opción Múltiple</h2>
+                <p class="mb-6">Elige la respuesta correcta para cada pregunta sobre el Capítulo 3.</p>
+
+                <div id="game3-questions" class="space-y-6">
+                    <!-- Pregunta 1 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">1. ¿Qué entidades propusieron sustituir a Krieger Vasena?</p>
+                        <div class="space-y-2">
+                            <label class="block"><input type="radio" name="q3-1" value="a" class="mr-2"> Solo la
+                                CGE</label>
+                            <label class="block"><input type="radio" name="q3-1" value="b" class="mr-2"> La CGE y la
+                                CGT</label>
+                            <label class="block"><input type="radio" name="q3-1" value="c" class="mr-2"> Solo los
+                                sindicatos de Córdoba</label>
+                        </div>
+                        <div class="feedback" data-correct="b">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (b) La CGE y la
+                                CGT.</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 2 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">2. La CGE y la CGT querían...</p>
+                        <div class="space-y-2">
+                            <label class="block"><input type="radio" name="q3-2" value="a" class="mr-2"> ...apoyar la
+                                violencia social.</label>
+                            <label class="block"><input type="radio" name="q3-2" value="b" class="mr-2"> ...usar la
+                                presión popular para lograr cambios.</label>
+                            <label class="block"><input type="radio" name="q3-2" value="c" class="mr-2"> ...pedir que se
+                                reprimiera con más dureza.</label>
+                        </div>
+                        <div class="feedback" data-correct="b">
+                            <span class="correct-feedback">¡Correcto! Querían cambios, pero no estaban de acuerdo con la
+                                violencia.</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (b).</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 3 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">3. ¿Cuál era la opinión de los medios y la gran burguesía?</p>
+                        <div class="space-y-2">
+                            <label class="block"><input type="radio" name="q3-3" value="a" class="mr-2"> Faltó autoridad
+                                contra el comunismo.</label>
+                            <label class="block"><input type="radio" name="q3-3" value="b" class="mr-2"> El gobierno
+                                reprimió demasiado.</label>
+                            <label class="block"><input type="radio" name="q3-3" value="c" class="mr-2"> Había que
+                                dialogar con los sindicatos.</label>
+                        </div>
+                        <div class="feedback" data-correct="a">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (a).</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 4 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">4. Los medios y la burguesía criticaban que el gobierno NO...
+                        </p>
+                        <div class="space-y-2">
+                            <label class="block"><input type="radio" name="q3-4" value="a" class="mr-2"> ...hubiera
+                                dialogado.</label>
+                            <label class="block"><input type="radio" name="q3-4" value="b" class="mr-2"> ...hubiera
+                                subido los salarios.</label>
+                            <label class="block"><input type="radio" name="q3-4" value="c" class="mr-2"> ...hubiera
+                                desmantelado los sindicatos.</label>
+                        </div>
+                        <div class="feedback" data-correct="c">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (c).</span>
+                        </div>
+                    </div>
+                    <!-- Pregunta 5 -->
+                    <div>
+                        <p class="font-bold text-lg mb-2">5. ¿La CGE y la CGT estaban de acuerdo con la violencia social
+                            del Cordobazo?</p>
+                        <div class="space-y-2">
+                            <label class="block"><input type="radio" name="q3-5" value="a" class="mr-2"> Sí, la
+                                promovían.</label>
+                            <label class="block"><input type="radio" name="q3-5" value="b" class="mr-2"> No, no estaban
+                                de acuerdo con esa estrategia.</label>
+                        </div>
+                        <div class="feedback" data-correct="b">
+                            <span class="correct-feedback">¡Correcto! Querían usar la presión, pero no la
+                                violencia.</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (b).</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="game3-check"
+                    class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition mt-6">Comprobar
+                </button>
+            </div>
+
+            <!-- Página 8: Capítulo 4 -->
+            <div id="page-8" class="page">
+                <h2 class="text-3xl font-serif text-primary mb-4">Capítulo 4: Diversidad de Miradas</h2>
+                <div class="prose max-w-none text-lg leading-relaxed">
+                    <audio controls class="w-full my-4">
+                        <source src="https://files.catbox.moe/4y4i28.mp3" type="audio/mpeg">
+                        Tu navegador no soporta el elemento de audio.
+                    </audio>
+                    <p>Desde el punto de vista de las organizaciones de la izquierda peronista y no peronista, el
+                        Cordobazo significaba el comienzo de la revolución social que conduciría al país hacia el
+                        socialismo.</p>
+                    <p>Por su parte, los partidos políticos tradicionales, el peronismo —de acuerdo con la opinión sobre
+                        el tema que Perón había dado a conocer desde su exilio en Madrid— y el radicalismo —conducido
+                        por Ricardo Balbín— pensaban que la violencia social debía tener como objetivo la recuperación
+                        de la democracia. Sostenían que la vida política del país debía reencauzarse en las
+                        instituciones del sistema republicano.</p>
+                    <p>Para los sectores liberales más tradicionales, el Cordobazo representaba la pérdida del orden y
+                        la confirmación de la imposibilidad de consolidar un modelo económico de crecimiento y de
+                        estabilidad sobre la base de los valores nacionales.</p>
+                </div>
+            </div>
+
+            <!-- Página 9: Evaluación Final (Juego 4 - Matching) -->
+            <div id="page-9" class="page">
+                <h2 class="text-3xl font-serif text-secondary mb-4">Evaluación Final: Conectando Ideas</h2>
+                <p class="mb-6">Relaciona cada actor social (columna izquierda) con su postura frente al Cordobazo (menú
+                    desplegable).</p>
+
+                <div class="space-y-4">
+                    <!-- Item 1 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                        <label for="match-1" class="font-bold text-lg">1. Izquierda (peronista y no)</label>
+                        <select id="match-1" name="match-1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecciona una postura...</option>
+                            <option value="a">Recuperar la democracia y las instituciones.</option>
+                            <option value="b">El comienzo de la revolución social.</option>
+                            <option value="c">Faltó autoridad; reprimir más.</option>
+                            <option value="d">Presionar por cambios, pero sin violencia.</option>
+                            <option value="e">Pérdida del orden y del modelo económico.</option>
+                        </select>
+                        <div class="feedback md:col-span-2" data-correct="b">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (b) El comienzo de la
+                                revolución social.</span>
+                        </div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                        <label for="match-2" class="font-bold text-lg">2. Partidos (Perón, Balbín)</label>
+                        <select id="match-2" name="match-2" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecciona una postura...</option>
+                            <option value="a">Recuperar la democracia y las instituciones.</option>
+                            <option value="b">El comienzo de la revolución social.</option>
+                            <option value="c">Faltó autoridad; reprimir más.</option>
+                            <option value="d">Presionar por cambios, pero sin violencia.</option>
+                            <option value="e">Pérdida del orden y del modelo económico.</option>
+                        </select>
+                        <div class="feedback md:col-span-2" data-correct="a">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (a) Recuperar la
+                                democracia y las instituciones.</span>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                        <label for="match-3" class="font-bold text-lg">3. Sectores Liberales</label>
+                        <select id="match-3" name="match-3" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecciona una postura...</option>
+                            <option value="a">Recuperar la democracia y las instituciones.</option>
+                            <option value="b">El comienzo de la revolución social.</option>
+                            <option value="c">Faltó autoridad; reprimir más.</option>
+                            <option value="d">Presionar por cambios, pero sin violencia.</option>
+                            <option value="e">Pérdida del orden y del modelo económico.</option>
+                        </select>
+                        <div class="feedback md:col-span-2" data-correct="e">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (e) Pérdida del orden
+                                y del modelo económico.</span>
+                        </div>
+                    </div>
+                    <!-- Item 4 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                        <label for="match-4" class="font-bold text-lg">4. Burguesía Industrial</label>
+                        <select id="match-4" name="match-4" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecciona una postura...</option>
+                            <option value="a">Recuperar la democracia y las instituciones.</option>
+                            <option value="b">El comienzo de la revolución social.</option>
+                            <option value="c">Faltó autoridad; reprimir más.</option>
+                            <option value="d">Presionar por cambios, pero sin violencia.</option>
+                            <option value="e">Pérdida del orden y del modelo económico.</option>
+                        </select>
+                        <div class="feedback md:col-span-2" data-correct="c">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (c) Faltó autoridad;
+                                reprimir más.</span>
+                        </div>
+                    </div>
+                    <!-- Item 5 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                        <label for="match-5" class="font-bold text-lg">5. CGE y CGT</label>
+                        <select id="match-5" name="match-5" class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option value="">Selecciona una postura...</option>
+                            <option value="a">Recuperar la democracia y las instituciones.</option>
+                            <option value="b">El comienzo de la revolución social.</option>
+                            <option value="c">Faltó autoridad; reprimir más.</option>
+                            <option value="d">Presionar por cambios, pero sin violencia.</option>
+                            <option value="e">Pérdida del orden y del modelo económico.</option>
+                        </select>
+                        <div class="feedback md:col-span-2" data-correct="d">
+                            <span class="correct-feedback">¡Correcto!</span>
+                            <span class="incorrect-feedback">Incorrecto. La respuesta correcta es (d) Presionar por
+                                cambios, pero sin violencia.</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="game4-check"
+                    class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition mt-6">Comprobar
+                    y Finalizar</button>
+            </div>
+
+            <!-- Página 10: Resultados -->
+            <div id="page-10" class="page text-center">
+                <h2 class="text-4xl font-serif text-primary mb-4">¡Felicitaciones!</h2>
+                <p class="text-xl mb-6">Has completado el recorrido sobre el Cordobazo.</p>
+                <div class="bg-cream p-6 rounded-lg shadow-inner mb-8">
+                    <p class="text-lg mb-2">Tu puntuación final es:</p>
+                    <p class="text-5xl font-bold text-accent">
+                        <span id="final-score">0</span> / <span id="total-score">10</span>
+                    </p>
+                </div>
+                <p class="text-lg mb-4">Resumen de tu desempeño:</p>
+                <ul class="text-left max-w-sm mx-auto space-y-2 mb-8">
+                    <li><strong>Juego 1 (Secuencia):</strong> <span id="score-game1">0</span>/2.5</li>
+                    <li><strong>Juego 2 (V/F):</strong> <span id="score-game2">0</span>/2.5</li>
+                    <li><strong>Juego 3 (Múltiple):</strong> <span id="score-game3">0</span>/2.5</li>
+                    <li><strong>Juego 4 (Relacionar):</strong> <span id="score-game4">0</span>/2.5</li>
+                </ul>
+
+                <!-- Campos para Nombre y Apellido -->
+                <div class="max-w-sm mx-auto space-y-4 mb-6">
+                    <div>
+                        <label for="student-name" class="block text-left font-bold mb-1 text-gray-700">Nombre:</label>
+                        <input type="text" id="student-name"
+                            class="w-full p-2 border border-gray-300 rounded-lg shadow-sm"
+                            placeholder="Escribe tu nombre">
+                    </div>
+                    <div>
+                        <label for="student-lastname"
+                            class="block text-left font-bold mb-1 text-gray-700">Apellido:</label>
+                        <input type="text" id="student-lastname"
+                            class="w-full p-2 border border-gray-300 rounded-lg shadow-sm"
+                            placeholder="Escribe tu apellido">
+                    </div>
+                    <div id="pdf-error" class="hidden text-incorrect text-sm font-bold"></div>
+                </div>
+
+                <button id="download-pdf"
+                    class="w-full bg-secondary text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg hover:bg-orange-600 transition duration-300">
+                    Descargar Informe PDF
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Navegación Flotante -->
+    <div id="nav-buttons" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-inner-top z-10">
+        <div class="flex justify-between max-w-3xl mx-auto">
+            <button id="prev-btn"
+                class="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400 transition">
+                Volver
+            </button>
+            <button id="next-btn"
+                class="bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition">
+                Siguiente
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = document.querySelectorAll('.page');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const startBtn = document.getElementById('start-btn');
+
+            let currentPage = 0;
+            const totalPages = pages.length;
+
+            // Puntuación
+            let scores = { game1: 0, game2: 0, game3: 0, game4: 0 };
+            let game1Attempts = 0; // Variable para contar intentos del Juego 1
+            const totalQuestions = 10; // 1 (G1) + 5 (G2) + 5 (G3) + 5 (G4) -> Re-ponderado a 10
+            let gameCheckStatus = { game1: false, game2: false, game3: false, game4: false };
+
+            function showPage(index) {
+                if (index < 0 || index >= totalPages) return;
+
+                pages[currentPage].classList.remove('active');
+                pages[index].classList.add('active');
+                currentPage = index;
+
+                updateNavButtons();
+            }
+
+            function updateNavButtons() {
+                // Ocultar botones de navegación en la portada y en la pág. de resultados
+                if (currentPage === 0 || currentPage === totalPages - 1) {
+                    document.getElementById('nav-buttons').style.display = 'none';
+                } else {
+                    document.getElementById('nav-buttons').style.display = 'block';
+                }
+
+                // prevBtn.disabled = currentPage <= 1; // Deshabilitar 'Volver' en la galería <-- ESTA LÍNEA SE ELIMINÓ
+                // prevBtn.classList.toggle('opacity-50', prevBtn.disabled); <-- Y ESTA TAMBIÉN
+
+                // Lógica para deshabilitar 'Siguiente' si el juego no está completado
+                let gameNotChecked = false;
+                if (currentPage === 3 && !gameCheckStatus.game1) gameNotChecked = true; // Juego 1
+                if (currentPage === 5 && !gameCheckStatus.game2) gameNotChecked = true; // Juego 2
+                if (currentPage === 7 && !gameCheckStatus.game3) gameNotChecked = true; // Juego 3
+
+                nextBtn.disabled = gameNotChecked;
+                nextBtn.classList.toggle('opacity-50', nextBtn.disabled);
+                nextBtn.classList.toggle('cursor-not-allowed', nextBtn.disabled);
+
+                // Cambiar texto a "Finalizar" en la última página de contenido (Evaluación)
+                if (currentPage === totalPages - 2) {
+                    nextBtn.style.display = 'none'; // Ocultar 'Siguiente' en la pág. de evaluación
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                }
+            }
+
+            // --- Navegación ---
+            startBtn.addEventListener('click', () => showPage(1));
+            nextBtn.addEventListener('click', () => {
+                if (!nextBtn.disabled) {
+                    showPage(currentPage + 1);
+                }
+            });
+            prevBtn.addEventListener('click', () => showPage(currentPage - 1));
+
+            // --- Lógica del Juego 1: Ordenar Secuencia ---
+            const game1Slots = document.querySelectorAll('#game1-slots .slot');
+            const game1OptionsContainer = document.getElementById('game1-options');
+            const game1ResetBtn = document.getElementById('game1-reset');
+            const game1CheckBtn = document.getElementById('game1-check');
+            const game1Feedback = document.getElementById('game1-feedback');
+
+            const game1CorrectOrder = [
+                "Derogación de regímenes del sábado inglés.",
+                "Congelamiento de convenios y salarios.",
+                "Sindicatos (SMATA, Luz y Fuerza, UTA) convocan asamblea.",
+                "Esos sindicatos tenían los salarios más altos.",
+                "La asamblea termina en enfrentamiento con la policía.",
+                "Se convoca a un paro general."
+            ];
+
+            let game1UserOrder = [];
+            let game1CurrentSlot = 0;
+
+            function initGame1() {
+                game1OptionsContainer.innerHTML = '';
+                game1UserOrder = [];
+                game1CurrentSlot = 0;
+                // No reiniciamos game1Attempts, queremos que persista
+                gameCheckStatus.game1 = false;
+                updateNavButtons();
+                game1Feedback.style.display = 'none';
+
+                // Re-habilitar botones
+                game1CheckBtn.disabled = false;
+                game1ResetBtn.disabled = false;
+
+                game1Slots.forEach((slot, index) => {
+                    slot.textContent = `${index + 1}.`;
+                    slot.classList.add('text-gray-500');
+                    slot.classList.remove('border-correct', 'border-incorrect', 'text-text-dark');
+                });
+
+                // Mezclar opciones
+                const shuffledOptions = [...game1CorrectOrder].sort(() => Math.random() - 0.5);
+
+                shuffledOptions.forEach(text => {
+                    const btn = document.createElement('button');
+                    btn.textContent = text;
+                    btn.classList.add('option-btn', 'bg-blue-100', 'text-blue-800', 'p-2', 'rounded-lg', 'shadow-sm', 'hover:bg-blue-200', 'transition', 'text-sm');
+                    btn.addEventListener('click', () => selectGame1Option(btn));
+                    game1OptionsContainer.appendChild(btn);
+                });
+            }
+
+            function selectGame1Option(btn) {
+                if (game1CurrentSlot < game1Slots.length) {
+                    const slot = game1Slots[game1CurrentSlot];
+                    slot.textContent = btn.textContent;
+                    slot.classList.remove('text-gray-500');
+                    slot.classList.add('text-text-dark');
+                    game1UserOrder.push(btn.textContent);
+                    btn.classList.add('disabled');
+                    game1CurrentSlot++;
+                }
+            }
+
+            game1ResetBtn.addEventListener('click', initGame1);
+
+            game1CheckBtn.addEventListener('click', () => {
+                let correct = true;
+                game1Attempts++; // Incrementamos el contador de intentos
+
+                game1UserOrder.forEach((item, index) => {
+                    if (item !== game1CorrectOrder[index]) {
+                        correct = false;
+                        game1Slots[index].classList.add('border-incorrect', 'border-2');
+                    } else {
+                        game1Slots[index].classList.add('border-correct', 'border-2');
+                    }
+                });
+
+                if (correct && game1UserOrder.length === game1CorrectOrder.length) {
+                    scores.game1 = 2.5;
+                    game1Feedback.textContent = '¡Excelente! El orden es correcto.';
+                    game1Feedback.className = 'feedback correct-feedback font-bold';
+                } else {
+                    scores.game1 = 0;
+                    game1Feedback.textContent = 'Algunos pasos son incorrectos. Revisa el orden.';
+                    game1Feedback.className = 'feedback incorrect-feedback font-bold';
+                }
+                game1Feedback.style.display = 'block';
+                gameCheckStatus.game1 = true;
+                game1CheckBtn.disabled = true;
+
+                // Lógica para 1 solo reintento
+                if (game1Attempts >= 2) {
+                    game1ResetBtn.disabled = true; // Desactivar reinicio después del 2do intento
+                } else {
+                    game1ResetBtn.disabled = false; // Asegurar que esté activo para el 1er reintento
+                }
+
+                updateNavButtons();
+                updateFinalScore();
+            });
+
+            // --- Lógica del Juego 2: Verdadero/Falso ---
+            const game2CheckBtn = document.getElementById('game2-check');
+            game2CheckBtn.addEventListener('click', () => {
+                let score = 0;
+                const questions = document.querySelectorAll('#game2-questions > div');
+
+                questions.forEach(q => {
+                    const feedbackEl = q.querySelector('.feedback');
+                    const correctVal = feedbackEl.dataset.correct;
+                    const selectedVal = q.querySelector('input:checked');
+
+                    if (selectedVal && selectedVal.value === correctVal) {
+                        score += 0.5;
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'block';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'none';
+                    } else {
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'none';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'block';
+                    }
+                    feedbackEl.style.display = 'block';
+                });
+
+                scores.game2 = score;
+                gameCheckStatus.game2 = true;
+                game2CheckBtn.disabled = true;
+                updateNavButtons();
+                updateFinalScore();
+            });
+
+            // --- Lógica del Juego 3: Múltiple Choice ---
+            const game3CheckBtn = document.getElementById('game3-check');
+            game3CheckBtn.addEventListener('click', () => {
+                let score = 0;
+                const questions = document.querySelectorAll('#game3-questions > div');
+
+                questions.forEach(q => {
+                    const feedbackEl = q.querySelector('.feedback');
+                    const correctVal = feedbackEl.dataset.correct;
+                    const selectedVal = q.querySelector('input:checked');
+
+                    if (selectedVal && selectedVal.value === correctVal) {
+                        score += 0.5;
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'block';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'none';
+                    } else {
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'none';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'block';
+                    }
+                    feedbackEl.style.display = 'block';
+                });
+
+                scores.game3 = score;
+                gameCheckStatus.game3 = true;
+                game3CheckBtn.disabled = true;
+                updateNavButtons();
+                updateFinalScore();
+            });
+
+            // --- Lógica del Juego 4: Matching ---
+            const game4CheckBtn = document.getElementById('game4-check');
+            game4CheckBtn.addEventListener('click', () => {
+                let score = 0;
+                const questions = document.querySelectorAll('#page-9 .grid');
+
+                questions.forEach(q => {
+                    const select = q.querySelector('select');
+                    const feedbackEl = q.querySelector('.feedback');
+                    const correctVal = feedbackEl.dataset.correct;
+
+                    if (select.value === correctVal) {
+                        score += 0.5;
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'block';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'none';
+                    } else {
+                        feedbackEl.querySelector('.correct-feedback').style.display = 'none';
+                        feedbackEl.querySelector('.incorrect-feedback').style.display = 'block';
+                    }
+                    feedbackEl.style.display = 'block';
+                });
+
+                scores.game4 = score;
+                gameCheckStatus.game4 = true;
+                game4CheckBtn.disabled = true;
+                updateFinalScore();
+
+                // Ir a la página final automáticamente
+                setTimeout(() => {
+                    showPage(totalPages - 1);
+                }, 1500); // Pequeña demora para ver el feedback
+            });
+
+            // --- Puntuación Final y PDF ---
+            function updateFinalScore() {
+                const totalScore = scores.game1 + scores.game2 + scores.game3 + scores.game4;
+                document.getElementById('final-score').textContent = totalScore.toFixed(1);
+                document.getElementById('total-score').textContent = totalQuestions;
+
+                document.getElementById('score-game1').textContent = `${scores.game1.toFixed(1)}/2.5`;
+                document.getElementById('score-game2').textContent = `${scores.game2.toFixed(1)}/2.5`;
+                document.getElementById('score-game3').textContent = `${scores.game3.toFixed(1)}/2.5`;
+                document.getElementById('score-game4').textContent = `${scores.game4.toFixed(1)}/2.5`;
+            }
+
+            document.getElementById('download-pdf').addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+
+                // --- NUEVA LÓGICA DE VALIDACIÓN ---
+                const nombreInput = document.getElementById('student-name');
+                const apellidoInput = document.getElementById('student-lastname');
+                const errorDiv = document.getElementById('pdf-error');
+
+                const nombre = nombreInput.value.trim().replace(/\s/g, '_'); // Reemplaza espacios por guion bajo
+                const apellido = apellidoInput.value.trim().replace(/\s/g, '_'); // Reemplaza espacios por guion bajo
+
+                if (!nombre || !apellido) {
+                    errorDiv.textContent = 'Por favor, completa tu nombre y apellido para descargar.';
+                    errorDiv.style.display = 'block';
+                    // Opcional: enfocar el primer campo vacío
+                    if (!nombre) {
+                        nombreInput.focus();
+                    } else {
+                        apellidoInput.focus();
+                    }
+                    return; // Detener la descarga
+                }
+
+                errorDiv.style.display = 'none'; // Ocultar error si todo está bien
+                const fileName = `Cordoba_${nombre}_${apellido}.pdf`;
+                // --- FIN DE LA NUEVA LÓGICA ---
+
+                const doc = new jsPDF();
+
+                const totalScore = scores.game1 + scores.game2 + scores.game3 + scores.game4;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(20);
+                doc.text("Informe: El Cordobazo", 105, 20, { align: 'center' });
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(14);
+                doc.text(`Puntuación Total: ${totalScore.toFixed(1)} / ${totalQuestions}`, 105, 35, { align: 'center' });
+
+                doc.setFontSize(12);
+                doc.text("Resumen de Desempeño:", 20, 50);
+                doc.text(`- Juego 1 (Ordenar Secuencia): ${scores.game1.toFixed(1)} / 2.5`, 30, 60);
+                doc.text(`- Juego 2 (Verdadero/Falso): ${scores.game2.toFixed(1)} / 2.5`, 30, 70);
+                doc.text(`- Juego 3 (Opción Múltiple): ${scores.game3.toFixed(1)} / 2.5`, 30, 80);
+                doc.text(`- Evaluación Final (Relacionar): ${scores.game4.toFixed(1)} / 2.5`, 30, 90);
+
+                doc.save(fileName); // Usar el nuevo nombre de archivo
+            });
+
+            // --- Inicialización ---
+            initGame1();
+            showPage(0);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Ministerio de la Escasez</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #1a1a1a;
+            color: #e5e5e5;
+            overscroll-behavior: none;
+            /* Prevenir rebote en móvil */
+        }
+
+        .header-font {
+            font-family: 'Chakra Petch', sans-serif;
+        }
+
+        /* Animaciones para barras */
+        .bar-transition {
+            transition: width 0.5s ease-in-out, background-color 0.3s;
+        }
+
+        /* Efecto de parpadeo crítico */
+        .critical {
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+
+        /* Botones grandes y táctiles */
+        .btn-decision {
+            transition: transform 0.1s;
+        }
+
+        .btn-decision:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- HUD / HEADER (Sticky) -->
+    <header class="bg-gray-900 border-b-2 border-gray-700 p-3 shadow-lg z-50 shrink-0">
+        <div class="flex justify-between items-center mb-2">
+            <h1 class="header-font text-xl font-bold text-yellow-500 uppercase tracking-widest">Sala de Guerra</h1>
+            <div class="text-xs text-gray-400" id="timer-display">Desgaste: 20s</div>
+        </div>
+
+        <!-- Resource Bars -->
+        <div class="space-y-3">
+            <!-- Suministros -->
+            <div class="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
+                <div id="bar-supplies"
+                    class="h-full bg-green-600 bar-transition flex items-center justify-end pr-2 text-xs font-bold"
+                    style="width: 100%;">100%</div>
+                <div class="absolute top-0 left-2 h-full flex items-center text-xs font-bold drop-shadow-md">
+                    <i class="fas fa-box-open mr-2"></i> Suministros
+                </div>
+            </div>
+            <!-- Mano de Obra -->
+            <div class="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
+                <div id="bar-manpower"
+                    class="h-full bg-blue-600 bar-transition flex items-center justify-end pr-2 text-xs font-bold"
+                    style="width: 100%;">100%</div>
+                <div class="absolute top-0 left-2 h-full flex items-center text-xs font-bold drop-shadow-md">
+                    <i class="fas fa-industry mr-2"></i> Industria
+                </div>
+            </div>
+            <!-- Paz Social -->
+            <div class="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
+                <div id="bar-social"
+                    class="h-full bg-purple-600 bar-transition flex items-center justify-end pr-2 text-xs font-bold"
+                    style="width: 100%;">100%</div>
+                <div class="absolute top-0 left-2 h-full flex items-center text-xs font-bold drop-shadow-md">
+                    <i class="fas fa-dove mr-2"></i> Paz Social
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- GAME AREA (Scrollable) -->
+    <main id="game-container" class="flex-grow p-4 overflow-y-auto pb-6 relative">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="flex flex-col items-center justify-center h-full text-center space-y-6">
+            <div class="text-6xl text-red-600 mb-4"><i class="fas fa-radiation"></i></div>
+            <h2 class="header-font text-3xl font-bold text-white">MINISTERIO DE LA ESCASEZ</h2>
+            <p class="text-gray-400 text-lg">Eres el Ministro de Economía de Guerra. Tus decisiones salvarán o
+                condenarán a la nación.</p>
+            <div class="bg-gray-800 p-4 rounded-lg text-left text-sm border border-gray-600">
+                <p class="mb-2"><i class="fas fa-skull text-red-500 mr-2"></i> <strong>ROGUELIKE:</strong> Si un recurso
+                    llega a 0, pierdes y reinicias.</p>
+                <p class="mb-2"><i class="fas fa-clock text-yellow-500 mr-2"></i> <strong>PRESIÓN:</strong> Los recursos
+                    bajan cada 20 segundos.</p>
+                <p><i class="fas fa-balance-scale text-blue-500 mr-2"></i> <strong>OBJETIVO:</strong> Sobrevive a los 15
+                    eventos.</p>
+            </div>
+            <button onclick="startGame()"
+                class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-[0_4px_0_rgb(153,27,27)] active:shadow-none active:translate-y-1 transition-all">
+                ASUMIR EL MANDO
+            </button>
+        </div>
+
+        <!-- Event Screen (Hidden by default) -->
+        <div id="event-screen" class="hidden flex flex-col h-full">
+            <div class="flex-grow flex flex-col justify-center">
+                <div class="bg-gray-800/80 backdrop-blur border border-gray-600 p-5 rounded-xl shadow-2xl mb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <span
+                            class="bg-yellow-900 text-yellow-200 text-xs px-2 py-1 rounded uppercase font-bold tracking-wider"
+                            id="event-tag">CRISIS #1</span>
+                        <span class="text-gray-500 text-xs" id="event-count">1/15</span>
+                    </div>
+                    <h3 id="event-title" class="header-font text-2xl font-bold text-white mb-4 leading-tight">Título del
+                        Evento</h3>
+                    <p id="event-desc" class="text-lg text-gray-300 leading-relaxed">Descripción del problema...</p>
+                </div>
+            </div>
+
+            <!-- Decision Cards -->
+            <div class="space-y-3 mt-auto" id="choices-container">
+                <!-- Buttons injected by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- GAME CONFIGURATION & STATE ---
+        const GAME_CONFIG = {
+            initialResources: 100,
+            decayAmount: 5,
+            decayInterval: 20000, // 20 seconds
+            totalEvents: 15
+        };
+
+        let state = {
+            supplies: 100,
+            manpower: 100,
+            social: 100,
+            currentEventIndex: 0,
+            timer: null,
+            timerInterval: null,
+            isGameOver: false
+        };
+
+        // --- CONTENT: 15 HISTORICAL SCENARIOS ---
+        const events = [
+            {
+                title: "Movilización Total",
+                desc: "El frente colapsa. El General Supremo exige 2 millones de hombres inmediatamente, pero las fábricas quedarán vacías.",
+                choices: [
+                    { text: "Enviar a todos (Prioridad Frente)", effect: { sup: -10, man: -25, soc: 5 } },
+                    { text: "Movilización parcial y propaganda", effect: { sup: -5, man: -10, soc: -10 } },
+                    { text: "Negar la solicitud (Proteger Industria)", effect: { sup: -25, man: 5, soc: -5 } }
+                ]
+            },
+            {
+                title: "Crisis de Proyectiles",
+                desc: "La artillería no tiene munición. Necesitamos doblar turnos en las fábricas, ignorando los derechos laborales.",
+                choices: [
+                    { text: "Doblar turnos (Sin pago extra)", effect: { sup: 20, man: -10, soc: -20 } },
+                    { text: "Contratar mujeres masivamente", effect: { sup: 10, man: 15, soc: -5 } },
+                    { text: "Racionar munición en el frente", effect: { sup: -20, man: 5, soc: 10 } }
+                ]
+            },
+            {
+                title: "El Invierno de los Nabos",
+                desc: "Bloqueo naval enemigo. No hay trigo. La población muere de hambre o come nabos forrajeros.",
+                choices: [
+                    { text: "Confiscar comida a granjeros", effect: { sup: 10, man: 0, soc: -25 } },
+                    { text: "Reducir raciones del ejército", effect: { sup: -20, man: 5, soc: 15 } },
+                    { text: "Comprar al mercado negro (Caro)", effect: { sup: 5, man: -15, soc: 5 } }
+                ]
+            },
+            {
+                title: "Huelga en los Astilleros",
+                desc: "Los sindicatos paralizan la producción de submarinos exigiendo pan y paz.",
+                choices: [
+                    { text: "Militarizar las fábricas (Represión)", effect: { sup: 10, man: -10, soc: -30 } },
+                    { text: "Negociar subida de sueldos", effect: { sup: -10, man: -5, soc: 10 } },
+                    { text: "Acusarlos de traición y ejecutar líderes", effect: { sup: 5, man: -20, soc: -40 } }
+                ]
+            },
+            {
+                title: "Gripe Española",
+                desc: "Una pandemia asola tanto las trincheras como las ciudades. Faltan médicos y medicinas.",
+                choices: [
+                    { text: "Medicinas para el frente solamente", effect: { sup: 5, man: -15, soc: -20 } },
+                    { text: "Cuarentena estricta (Para la industria)", effect: { sup: -10, man: -25, soc: -5 } },
+                    { text: "Ignorarlo y censurar la prensa", effect: { sup: 0, man: -20, soc: -10 } }
+                ]
+            },
+            {
+                title: "Bonos de Guerra",
+                desc: "El tesoro está vacío. Necesitamos financiar la nueva ofensiva de primavera.",
+                choices: [
+                    { text: "Campaña agresiva de Bonos", effect: { sup: 15, man: -5, soc: -5 } },
+                    { text: "Imprimir dinero (Inflación)", effect: { sup: 10, man: 0, soc: -20 } },
+                    { text: "Subir impuestos a la clase alta", effect: { sup: 5, man: -5, soc: 15 } }
+                ]
+            },
+            {
+                title: "Mano de Obra Colonial",
+                desc: "Faltan brazos. Podemos traer trabajadores de las colonias, pero los nacionalistas se oponen.",
+                choices: [
+                    { text: "Traer 500.000 trabajadores", effect: { sup: -5, man: 30, soc: -15 } },
+                    { text: "Usar prisioneros de guerra", effect: { sup: 5, man: 15, soc: -5 } },
+                    { text: "No hacer nada", effect: { sup: -5, man: -10, soc: 5 } }
+                ]
+            },
+            {
+                title: "El Mercado Negro",
+                desc: "Las mafias controlan la carne y el combustible. La corrupción es rampante.",
+                choices: [
+                    { text: "Redada policial masiva", effect: { sup: 5, man: -5, soc: -10 } },
+                    { text: "Legalizar y tasar el mercado", effect: { sup: 15, man: 5, soc: -15 } },
+                    { text: "Ignorarlo para mantener moral alta", effect: { sup: -10, man: 0, soc: 10 } }
+                ]
+            },
+            {
+                title: "Escasez de Caucho",
+                desc: "Sin caucho no hay camiones ni máscaras de gas. Necesitamos reciclar o sustitutos sintéticos.",
+                choices: [
+                    { text: "Confiscar neumáticos civiles", effect: { sup: 10, man: 0, soc: -20 } },
+                    { text: "Invertir en síntesis química (Costoso)", effect: { sup: -15, man: -10, soc: 5 } },
+                    { text: "Usar llantas de madera (Ineficiente)", effect: { sup: -20, man: 5, soc: 0 } }
+                ]
+            },
+            {
+                title: "Motín en el Frente",
+                desc: "Un regimiento se niega a atacar. La moral está en el punto de quiebre.",
+                choices: [
+                    { text: "Diezmar (Ejecutar 1 de cada 10)", effect: { sup: 0, man: -20, soc: -25 } },
+                    { text: "Enviar mejores raciones", effect: { sup: -25, man: 0, soc: 10 } },
+                    { text: "Prometer rotación de tropas", effect: { sup: -10, man: -15, soc: 5 } }
+                ]
+            },
+            {
+                title: "Bombardeo Estratégico",
+                desc: "El enemigo bombardea nuestras zonas industriales día y noche.",
+                choices: [
+                    { text: "Dispersar fábricas al campo", effect: { sup: -15, man: -10, soc: 5 } },
+                    { text: "Construir búnkers (Mano de obra)", effect: { sup: -5, man: -20, soc: 10 } },
+                    { text: "Aumentar defensas antiaéreas", effect: { sup: -20, man: 5, soc: 5 } }
+                ]
+            },
+            {
+                title: "Propaganda Derrotista",
+                desc: "Panfletos enemigos inundan las calles pidiendo la rendición.",
+                choices: [
+                    { text: "Censura total y arrestos", effect: { sup: 0, man: -5, soc: -15 } },
+                    { text: "Contra-propaganda patriótica", effect: { sup: -5, man: -5, soc: 10 } },
+                    { text: "Ignorar (Ahorrar recursos)", effect: { sup: 0, man: 0, soc: -10 } }
+                ]
+            },
+            {
+                title: "Fuga de Cerebros",
+                desc: "Científicos clave quieren huir a países neutrales por miedo a purgas.",
+                choices: [
+                    { text: "Arrestarlos preventivamente", effect: { sup: 0, man: -10, soc: -20 } },
+                    { text: "Sobornarlos con lujos", effect: { sup: -15, man: 0, soc: -5 } },
+                    { text: "Apelar al patriotismo", effect: { sup: 0, man: 0, soc: 0 } } // Riesgoso, en lógica simple es neutro
+                ]
+            },
+            {
+                title: "Carbón o Calefacción",
+                desc: "Invierno crudo. No hay suficiente carbón para trenes y hogares a la vez.",
+                choices: [
+                    { text: "Todo para los trenes (Logística)", effect: { sup: 15, man: 0, soc: -30 } },
+                    { text: "Todo para los hogares (Moral)", effect: { sup: -20, man: 5, soc: 20 } },
+                    { text: "Reparto 50/50 (Ineficiente)", effect: { sup: -5, man: -5, soc: -5 } }
+                ]
+            },
+            {
+                title: "La Ofensiva Final",
+                desc: "Es todo o nada. El enemigo tambalea, pero nosotros también. ¿Qué sacrificamos?",
+                choices: [
+                    { text: "Sacrificar Industria por Armas", effect: { sup: 30, man: -40, soc: 0 } },
+                    { text: "Sacrificar Civiles por Soldados", effect: { sup: 10, man: 10, soc: -50 } },
+                    { text: "Ataque equilibrado (Arriesgado)", effect: { sup: -10, man: -10, soc: -10 } }
+                ]
+            }
+        ];
+
+        // --- AUDIO ASSETS (Simulated for single file) ---
+        // Not using external audio to keep it purely code-based and robust
+
+        // --- CORE FUNCTIONS ---
+
+        function startGame() {
+            // Reset Vars
+            state.supplies = GAME_CONFIG.initialResources;
+            state.manpower = GAME_CONFIG.initialResources;
+            state.social = GAME_CONFIG.initialResources;
+            state.currentEventIndex = 0;
+            state.isGameOver = false;
+
+            // UI Updates
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('event-screen').classList.remove('hidden');
+
+            updateBars();
+
+            // Start Timer Loop
+            clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(gameLoopTick, GAME_CONFIG.decayInterval);
+
+            // Render First Event
+            renderEvent();
+        }
+
+        function gameLoopTick() {
+            if (state.isGameOver) return;
+
+            // Apply Decay
+            const decay = GAME_CONFIG.decayAmount;
+
+            applyResources(-decay, -decay, -decay);
+
+            // Feedback Visual
+            const timerDisplay = document.getElementById('timer-display');
+            timerDisplay.classList.add('text-red-500');
+            timerDisplay.innerText = "¡DESGASTE! -5";
+            setTimeout(() => {
+                timerDisplay.classList.remove('text-red-500');
+                timerDisplay.innerText = "Desgaste: 20s";
+            }, 1500);
+
+            // Check Game Over logic handled inside applyResources
+        }
+
+        function applyResources(supChange, manChange, socChange) {
+            if (state.isGameOver) return;
+
+            state.supplies += supChange;
+            state.manpower += manChange;
+            state.social += socChange;
+
+            // Cap at 100
+            if (state.supplies > 100) state.supplies = 100;
+            if (state.manpower > 100) state.manpower = 100;
+            if (state.social > 100) state.social = 100;
+
+            updateBars();
+            checkWinLossCondition();
+        }
+
+        function updateBars() {
+            updateSingleBar('bar-supplies', state.supplies);
+            updateSingleBar('bar-manpower', state.manpower);
+            updateSingleBar('bar-social', state.social);
+        }
+
+        function updateSingleBar(id, value) {
+            const el = document.getElementById(id);
+            el.style.width = `${Math.max(0, value)}%`;
+            el.innerText = `${Math.floor(value)}%`;
+
+            // Color logic
+            el.classList.remove('bg-green-600', 'bg-yellow-500', 'bg-red-600');
+            el.parentElement.classList.remove('critical');
+
+            if (value <= 20) {
+                el.classList.add('bg-red-600');
+                el.parentElement.classList.add('critical');
+            } else if (value <= 50) {
+                el.classList.add('bg-yellow-500');
+            } else {
+                el.classList.add(id === 'bar-supplies' ? 'bg-green-600' : id === 'bar-manpower' ? 'bg-blue-600' : 'bg-purple-600');
+            }
+        }
+
+        function renderEvent() {
+            if (state.currentEventIndex >= events.length) {
+                victory();
+                return;
+            }
+
+            const evt = events[state.currentEventIndex];
+
+            // Animate transition
+            const container = document.getElementById('event-screen');
+            container.classList.add('opacity-0');
+
+            setTimeout(() => {
+                document.getElementById('event-tag').innerText = `CRISIS #${state.currentEventIndex + 1}`;
+                document.getElementById('event-count').innerText = `${state.currentEventIndex + 1}/${events.length}`;
+                document.getElementById('event-title').innerText = evt.title;
+                document.getElementById('event-desc').innerText = evt.desc;
+
+                const choicesContainer = document.getElementById('choices-container');
+                choicesContainer.innerHTML = ''; // Clear old buttons
+
+                evt.choices.forEach((choice, index) => {
+                    const btn = document.createElement('button');
+                    // Styling for large touch targets
+                    btn.className = `btn-decision w-full text-left p-4 rounded-lg border-l-4 shadow-md mb-2 flex flex-col items-start justify-center group
+                        ${index === 0 ? 'bg-gray-700 border-green-500 hover:bg-gray-600' : ''}
+                        ${index === 1 ? 'bg-gray-700 border-yellow-500 hover:bg-gray-600' : ''}
+                        ${index === 2 ? 'bg-gray-700 border-blue-500 hover:bg-gray-600' : ''}`;
+
+                    btn.innerHTML = `
+                        <span class="font-bold text-white text-lg block mb-1 group-hover:pl-2 transition-all">
+                            ${String.fromCharCode(65 + index)}. ${choice.text}
+                        </span>
+                        <div class="text-xs text-gray-400 flex gap-2">
+                             ${getImpactPreview(choice.effect)}
+                        </div>
+                    `;
+
+                    btn.onclick = () => handleDecision(choice);
+                    choicesContainer.appendChild(btn);
+                });
+
+                container.classList.remove('opacity-0');
+            }, 200);
+        }
+
+        function getImpactPreview(effect) {
+            // Helper to show hints on buttons (optional, adds strategy)
+            let html = '';
+            if (effect.sup !== 0) html += `<span class="${effect.sup > 0 ? 'text-green-400' : 'text-red-400'}"><i class="fas fa-box"></i> ${effect.sup > 0 ? '+' : ''}${effect.sup}</span>`;
+            if (effect.man !== 0) html += `<span class="${effect.man > 0 ? 'text-blue-400' : 'text-red-400'}"><i class="fas fa-industry"></i> ${effect.man > 0 ? '+' : ''}${effect.man}</span>`;
+            if (effect.soc !== 0) html += `<span class="${effect.soc > 0 ? 'text-purple-400' : 'text-red-400'}"><i class="fas fa-dove"></i> ${effect.soc > 0 ? '+' : ''}${effect.soc}</span>`;
+            return html;
+        }
+
+        function handleDecision(choice) {
+            if (state.isGameOver) return;
+
+            // Apply effects
+            applyResources(choice.effect.sup, choice.effect.man, choice.effect.soc);
+
+            if (state.isGameOver) return; // Stop if died
+
+            // Next Event
+            state.currentEventIndex++;
+
+            // Scroll to top
+            document.getElementById('game-container').scrollTop = 0;
+
+            renderEvent();
+        }
+
+        function checkWinLossCondition() {
+            // LOSS CONDITION
+            if (state.supplies <= 0 || state.manpower <= 0 || state.social <= 0) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            state.isGameOver = true;
+            clearInterval(state.timerInterval);
+
+            // Determine cause of death
+            let cause = "Colapso General";
+            if (state.supplies <= 0) cause = "El frente se quedó sin comida y munición.";
+            if (state.manpower <= 0) cause = "No hay nadie para trabajar. La economía paró.";
+            if (state.social <= 0) cause = "Revolución civil. El gobierno ha caído.";
+
+            Swal.fire({
+                title: 'DERROTA TOTAL',
+                text: cause,
+                icon: 'error',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonText: 'REINICIAR GUERRA',
+                confirmButtonColor: '#dc2626',
+                allowOutsideClick: false,
+                backdrop: `rgba(0,0,0,0.9)`
+            }).then(() => {
+                location.reload(); // Hard Reset (Roguelike style)
+            });
+        }
+
+        function victory() {
+            state.isGameOver = true;
+            clearInterval(state.timerInterval);
+
+            Swal.fire({
+                title: 'VICTORIA PÍRRICA',
+                html: `Has sobrevivido a la guerra.<br><br>
+                       Suministros: ${state.supplies}%<br>
+                       Industria: ${state.manpower}%<br>
+                       Paz Social: ${state.social}%`,
+                icon: 'success',
+                background: '#1f2937',
+                color: '#fff',
+                confirmButtonText: 'JUGAR DE NUEVO',
+                confirmButtonColor: '#16a34a',
+                allowOutsideClick: false
+            }).then(() => {
+                startGame();
+            });
+        }
+
+        // Init CSS Transitions on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('event-screen').classList.add('transition-opacity', 'duration-300');
+        });
+
+    </script>
+</body>
+
+</html>
