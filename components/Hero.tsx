@@ -34,6 +34,8 @@ export const Hero: React.FC = () => {
                   alt="Laptop con tecnología educativa holográfica"
                   className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                   src="https://i.ibb.co/sdWBvncn/e01b5fed-5f83-4ba4-914b-1530c72c49b1.png"
+                  width="800"
+                  height="600"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-transparent pointer-events-none"></div>

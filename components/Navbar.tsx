@@ -37,6 +37,8 @@ export const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
               alt="Aula Beta Logo"
               referrerPolicy="no-referrer"
               className="h-12 w-auto transition-transform group-hover:scale-105"
+              width="48"
+              height="48"
             />
             <span className="ml-3 text-xl font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors">
               Aula Beta

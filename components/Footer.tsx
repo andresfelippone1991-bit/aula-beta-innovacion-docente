@@ -23,6 +23,9 @@ export const Footer: React.FC = () => {
                 alt="Aula Beta Logo"
                 referrerPolicy="no-referrer"
                 className="h-12 w-auto"
+                loading="lazy"
+                width="48"
+                height="48"
               />
             </div>
             <p className="leading-relaxed">
@@ -39,6 +42,9 @@ export const Footer: React.FC = () => {
                   alt="instagram"
                   className="w-5 group-hover:scale-110 transition-transform"
                   src="https://www.svgrepo.com/show/303145/instagram-2-1-logo.svg"
+                  loading="lazy"
+                  width="20"
+                  height="20"
                 />
               </a>
             </div>

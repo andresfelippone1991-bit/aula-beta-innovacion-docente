@@ -75,6 +75,9 @@ export const ClassroomGames: React.FC = () => {
                                     src={game.img}
                                     alt={game.title}
                                     className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                    width="640"
+                                    height="360"
                                 />
                             </div>
 
