@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { db } from './src/firebase/config';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -71,6 +72,7 @@ const App: React.FC = () => {
             </Routes>
           </main>
           <Footer />
+          <SpeedInsights />
         </div>
       </Router>
     </AuthProvider>
