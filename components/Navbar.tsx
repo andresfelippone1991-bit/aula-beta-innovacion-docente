@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleDarkMode }) => {
         <div className="flex justify-between h-20 items-center">
           <Link to="/" className="flex items-center group cursor-pointer">
             <img
-              src="https://i.ibb.co/fYnj5qZY/Dise-o-sin-t-tulo.png"
+              src="/images/logo.webp"
               alt="Aula Beta Logo"
               referrerPolicy="no-referrer"
               className="h-12 w-auto transition-transform group-hover:scale-105"

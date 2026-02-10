@@ -14,35 +14,35 @@ const GAMES: Game[] = [
         id: 1,
         title: "El Cordobazo",
         description: "Revive las jornadas de 1969. Una aventura histórica interactiva.",
-        img: "https://files.catbox.moe/mxfus4.png",
+        img: "/images/game-cordobazo.webp",
         url: "/games/cordobazo.html"
     },
     {
         id: 2,
         title: "Fin de la Edad Media",
         description: "Sobrevive a la crisis feudal y descubre el nacimiento de la burguesía.",
-        img: "https://files.catbox.moe/57wknw.png",
+        img: "/images/game-edad-media.webp",
         url: "/games/edad-media.html"
     },
     {
         id: 3,
         title: "La Encrucijada",
         description: "No hay respuestas correctas. Pon a prueba tu brújula moral.",
-        img: "https://files.catbox.moe/pix636.png",
+        img: "/images/game-encrucijada.webp",
         url: "/games/la-encrucijada.html"
     },
     {
         id: 4,
         title: "Sombras del Poder",
         description: "Un juego de roles ocultos sobre la dictadura y la resistencia.",
-        img: "https://files.catbox.moe/47xit3.png",
+        img: "/images/game-sombras.webp",
         url: "/games/sombras-del-poder.html"
     },
     {
         id: 5,
         title: "Ministerio de la Escasez",
         description: "Gestiona la crisis económica antes de que se agote el tiempo.",
-        img: "https://files.catbox.moe/45do3y.png",
+        img: "/images/game-escasez.webp",
         url: "/games/ministerio-escasez.html"
     }
 ];

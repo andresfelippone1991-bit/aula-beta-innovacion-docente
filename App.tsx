@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { db } from './src/firebase/config';
 import { Navbar } from './components/Navbar';
-import { Home } from './pages/Home';
-import { IAPlanning } from './pages/IAPlanning';
-import { ClassroomGames } from './pages/ClassroomGames';
-import { TeacherLibrary } from './pages/TeacherLibrary';
-import { Regulations } from './pages/Regulations';
-import { Privacy } from './pages/Privacy';
-import { Terms } from './pages/Terms';
-import { CoreFeatures } from './pages/CoreFeatures';
-import { Login } from './src/pages/Login';
-import { Register } from './src/pages/Register';
 import { Footer } from './components/Footer';
 import { AuthProvider } from './src/context/AuthContext';
+
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
+const IAPlanning = lazy(() => import('./pages/IAPlanning').then(module => ({ default: module.IAPlanning })));
+const ClassroomGames = lazy(() => import('./pages/ClassroomGames').then(module => ({ default: module.ClassroomGames })));
+const TeacherLibrary = lazy(() => import('./pages/TeacherLibrary').then(module => ({ default: module.TeacherLibrary })));
+const Regulations = lazy(() => import('./pages/Regulations').then(module => ({ default: module.Regulations })));
+const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })));
+const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })));
+const CoreFeatures = lazy(() => import('./pages/CoreFeatures').then(module => ({ default: module.CoreFeatures })));
+const Login = lazy(() => import('./src/pages/Login').then(module => ({ default: module.Login })));
+const Register = lazy(() => import('./src/pages/Register').then(module => ({ default: module.Register })));
+
+// Loading Component
+const PageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -57,18 +66,20 @@ const App: React.FC = () => {
           <ScrollToTop />
           <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
           <main>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/ia-planificacion" element={<IAPlanning />} />
-              <Route path="/juegos-aula" element={<ClassroomGames />} />
-              <Route path="/biblioteca-docente" element={<TeacherLibrary />} />
-              <Route path="/biblioteca-docente/normativa" element={<Regulations />} />
-              <Route path="/privacidad" element={<Privacy />} />
-              <Route path="/terminos" element={<Terms />} />
-              <Route path="/funcionalidades-core" element={<CoreFeatures />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/registro" element={<Register />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/ia-planificacion" element={<IAPlanning />} />
+                <Route path="/juegos-aula" element={<ClassroomGames />} />
+                <Route path="/biblioteca-docente" element={<TeacherLibrary />} />
+                <Route path="/biblioteca-docente/normativa" element={<Regulations />} />
+                <Route path="/privacidad" element={<Privacy />} />
+                <Route path="/terminos" element={<Terms />} />
+                <Route path="/funcionalidades-core" element={<CoreFeatures />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/registro" element={<Register />} />
+              </Routes>
+            </Suspense>
           </main>
           <Footer />
         </div>

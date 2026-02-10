@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-6 col-span-1 md:col-span-1">
             <div className="flex items-center">
               <img
-                src="https://i.ibb.co/fYnj5qZY/Dise-o-sin-t-tulo.png"
+                src="/images/logo.webp"
                 alt="Aula Beta Logo"
                 referrerPolicy="no-referrer"
                 className="h-12 w-auto"

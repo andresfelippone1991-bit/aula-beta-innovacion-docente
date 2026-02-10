@@ -33,7 +33,7 @@ export const Hero: React.FC = () => {
                 <img
                   alt="Laptop con tecnología educativa holográfica"
                   className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-                  src="https://i.ibb.co/sdWBvncn/e01b5fed-5f83-4ba4-914b-1530c72c49b1.png"
+                  src="/images/hero-image.webp"
                   width="800"
                   height="600"
                 />
