@@ -1,0 +1,4 @@
+dist\images\hero-image.webp
+dist\images\logo.webp
+public\images\hero-image.webp
+public\images\logo.webp

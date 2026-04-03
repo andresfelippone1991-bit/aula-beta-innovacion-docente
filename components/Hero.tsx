@@ -14,7 +14,7 @@ export const Hero: React.FC = () => {
 
           <div className="space-y-4">
             <h1 className="text-6xl lg:text-7xl font-bold text-[#1e293b] dark:text-white leading-[1.05] tracking-tight">
-              Innovación real <br />
+              Innovación Docente <br />
               <span className="text-[#2563eb]">para el aula real</span>
             </h1>
             <p className="text-lg lg:text-xl text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed">

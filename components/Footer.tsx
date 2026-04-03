@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-navy-950 text-slate-300 pt-20 pb-10 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-16">
           <div className="space-y-6 col-span-1 md:col-span-1">
             <div className="flex items-center">
               <img
@@ -62,6 +62,16 @@ export const Footer: React.FC = () => {
               <li>
                 <a className="hover:text-primary transition-colors block" href="/biblioteca-docente">Biblioteca Docente</a>
               </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-lg">Conceptos Clave</h4>
+            <ul className="space-y-4 text-slate-400">
+              <li>Innovación Docente</li>
+              <li>Gamificación Educativa</li>
+              <li>Tecnología en el Aula</li>
+              <li>IA para Profesores</li>
             </ul>
           </div>
 
