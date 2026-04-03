@@ -2,6 +2,7 @@
 import React from 'react';
 import { Hero } from '../components/Hero';
 import { Features } from '../components/Features';
+import { Methodology } from '../components/Methodology';
 import { PlannerAI } from '../components/PlannerAI';
 import { ResourceBank } from '../components/ResourceBank';
 import { InstitutionalEcosystem } from '../components/InstitutionalEcosystem';
@@ -12,6 +13,7 @@ export const Home: React.FC = () => {
         <>
             <Hero />
             <Features />
+            <Methodology />
             <PlannerAI />
             <ResourceBank />
             <InstitutionalEcosystem />

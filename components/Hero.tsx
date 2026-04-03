@@ -31,7 +31,7 @@ export const Hero: React.FC = () => {
             <div className="bg-white dark:bg-slate-800 rounded-[3rem] p-3 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.12)] dark:shadow-blue-900/20 border border-slate-100 dark:border-slate-700 transition-all duration-500 group-hover:scale-[1.01] overflow-hidden">
               <div className="relative rounded-[2.5rem] overflow-hidden aspect-[4/3] bg-slate-50 dark:bg-slate-900">
                 <img
-                  alt="Laptop con tecnología educativa holográfica"
+                  alt="Laptop mostrando recursos de tecnología educativa e IA en el aula, concepto de innovación docente real"
                   className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                   src="/images/hero-image.webp"
                   width="800"

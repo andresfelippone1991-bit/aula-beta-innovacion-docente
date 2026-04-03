@@ -7,22 +7,22 @@ import { ResourceRequestModal } from './ResourceRequestModal';
 const CATEGORIES = [
   {
     key: 'ia-planificacion',
-    title: 'IA Y PLANIFICACIÓN',
-    description: 'Secuencias didácticas y rúbricas en segundos.',
+    title: 'IA Y PLANIFICACIÓN PARA DOCENTES',
+    description: 'Secuencias didácticas y rúbricas generadas por inteligencia artificial en segundos.',
     icon: 'psychology',
     path: '/ia-planificacion'
   },
   {
     key: 'juegos-aula',
-    title: 'JUEGOS DE AULA',
-    description: 'Escape Rooms y trivias listas para usar.',
+    title: 'GAMIFICACIÓN Y JUEGOS DE AULA',
+    description: 'Escape Rooms y trivias estratégicas listas para ser aplicadas en clase.',
     icon: 'extension',
     path: '/juegos-aula'
   },
   {
     key: 'biblioteca-docente',
     title: 'BIBLIOTECA DOCENTE',
-    description: 'Guías DUA, Normativa y Documentos esenciales.',
+    description: 'Guías DUA, Normativa y Documentos esenciales para el educador.',
     icon: 'folder_open',
     path: '/biblioteca-docente'
   }

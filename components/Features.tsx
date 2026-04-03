@@ -4,18 +4,18 @@ import React from 'react';
 const FEATURE_LIST = [
   {
     icon: 'school',
-    title: 'Pedagogía Sólida',
-    description: 'Estrategias basadas en evidencia científica aplicables mañana mismo en tu salón.'
+    title: 'Formación Docente y Pedagogía Sólida',
+    description: 'Estrategias basadas en evidencia científica aplicables mañana mismo en tu salón para transformar tu práctica diaria.'
   },
   {
     icon: 'psychology',
-    title: 'Neuroeducación',
-    description: 'Entendemos cómo aprende el cerebro para optimizar cada minuto de tus clases.'
+    title: 'Neuroeducación y Gamificación',
+    description: 'Entendemos cómo aprende el cerebro para optimizar cada minuto de tus clases integrando dinámicas lúdicas interactivas.'
   },
   {
     icon: 'rocket_launch',
-    title: 'Tecnología Real',
-    description: 'Herramientas digitales curadas y prácticas para potenciar tu labor docente.'
+    title: 'IA en Educación y Tecnología Real',
+    description: 'Herramientas digitales prácticas y recursos de inteligencia artificial curados para potenciar tu labor docente.'
   }
 ];
 
