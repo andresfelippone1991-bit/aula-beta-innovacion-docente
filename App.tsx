@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { db } from './src/firebase/config';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -82,6 +83,7 @@ const App: React.FC = () => {
             </Suspense>
           </main>
           <Footer />
+          <Analytics />
         </div>
       </Router>
     </AuthProvider>
