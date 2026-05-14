@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plantillas de Prompt para Docentes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0F172A;
+    --paper: #F8FAFC;
+    --cream: #EFF6FF;
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --blue-light: #DBEAFE;
+    --blue-mid: #BFDBFE;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --card: #ffffff;
+    --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 4px 16px rgba(37,99,235,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* HEADER */
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-logo {
+    width: 40px; height: 40px;
+    background: var(--blue);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.4px;
+  }
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+  .badge {
+    margin-left: auto;
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  /* FILTER BAR */
+  .filter-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 40px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+  .filter-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+  .filter-btn .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  /* MAIN GRID */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 40px 0;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 20px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.12), 0 1px 4px rgba(15,23,42,0.06);
+  }
+  .card.hidden { display: none; }
+
+  .card-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FAFCFF;
+  }
+  .card-emoji {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .card-meta { flex: 1; }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .cat-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    white-space: nowrap;
+  }
+
+  /* Category accent colors — all use blue family + some distinct ones */
+  .cat-ejercicios   { background: #FEF3C7; color: #92400E; }
+  .cat-evaluacion   { background: #F3E8FF; color: #6B21A8; }
+  .cat-planificacion{ background: #DBEAFE; color: #1E40AF; }
+  .cat-comunicacion { background: #DCFCE7; color: #166534; }
+  .cat-interactivo  { background: #FFEDD5; color: #9A3412; }
+  .cat-nee          { background: #FEE2E2; color: #991B1B; }
+  .cat-comentarios  { background: #CCFBF1; color: #115E59; }
+
+  .card-body {
+    padding: 16px 20px;
+    flex: 1;
+  }
+
+  .field-group { margin-bottom: 11px; }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .field-input, .field-select, .field-textarea {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+    resize: none;
+  }
+  .field-input:focus, .field-select:focus, .field-textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+  .field-textarea { min-height: 56px; }
+
+  .fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* PREVIEW */
+  .preview-box {
+    background: var(--blue-light);
+    border: 1.5px solid var(--blue-mid);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 12px 20px 0;
+  }
+  .preview-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .preview-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22C55E;
+    box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
+  }
+  .preview-text {
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #1E3A5F;
+    font-style: italic;
+    word-break: break-word;
+  }
+  .tok-filled {
+    background: #DBEAFE;
+    color: #1D4ED8;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-style: normal;
+    font-weight: 600;
+    border: 1px solid #BFDBFE;
+  }
+  .tok-empty {
+    background: #FEF9C3;
+    color: #854D0E;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px dashed #FCD34D;
+  }
+
+  /* ACTION BUTTONS */
+  .card-footer {
+    padding: 12px 20px 16px;
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+  }
+  .btn {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: all 0.15s ease;
+  }
+  .btn-copy {
+    background: #fff;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+  }
+  .btn-copy:hover {
+    background: var(--paper);
+    border-color: #94A3B8;
+  }
+  .btn-copy.copied {
+    background: #F0FDF4;
+    border-color: #86EFAC;
+    color: #166534;
+  }
+  .btn-send {
+    background: var(--blue);
+    color: white;
+  }
+  .btn-send:hover {
+    background: var(--blue-dark);
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+  }
+  .btn svg {
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .filter-bar { padding: 10px 20px; }
+    .main { padding: 20px 20px 0; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .fields-row { grid-template-columns: 1fr; }
+    .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">📚</div>
+  <div class="header-text">
+    <h1>Aula Beta · Plantillas de Prompt</h1>
+    <p>Genera prompts efectivos para Claude con campos personalizables</p>
+  </div>
+  <div class="badge">11 plantillas · 7 categorías</div>
+</header>
+
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-cat="all" onclick="filterCards('all')">
+    <span class="dot"></span> Todas
+  </button>
+  <button class="filter-btn" data-cat="ejercicios" onclick="filterCards('ejercicios')">
+    <span class="dot" style="color:#c4622d"></span> Ejercicios
+  </button>
+  <button class="filter-btn" data-cat="evaluacion" onclick="filterCards('evaluacion')">
+    <span class="dot" style="color:#9b59b6"></span> Evaluación
+  </button>
+  <button class="filter-btn" data-cat="planificacion" onclick="filterCards('planificacion')">
+    <span class="dot" style="color:#4a6fa5"></span> Planificación
+  </button>
+  <button class="filter-btn" data-cat="comunicacion" onclick="filterCards('comunicacion')">
+    <span class="dot" style="color:#27ae60"></span> Comunicación
+  </button>
+  <button class="filter-btn" data-cat="interactivo" onclick="filterCards('interactivo')">
+    <span class="dot" style="color:#e67e22"></span> Interactivo
+  </button>
+  <button class="filter-btn" data-cat="nee" onclick="filterCards('nee')">
+    <span class="dot" style="color:#e74c3c"></span> NEE
+  </button>
+  <button class="filter-btn" data-cat="comentarios" onclick="filterCards('comentarios')">
+    <span class="dot" style="color:#2c9b85"></span> Comentarios
+  </button>
+</div>
+
+<div class="main">
+  <p class="section-label">Selecciona una plantilla, rellena los campos y envía a Claude</p>
+  <div class="cards-grid" id="cardsGrid">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 1. EJERCICIOS — Práctica diferenciada          -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="ejercicios">
+      <div class="card-header">
+        <span class="card-emoji">✏️</span>
+        <div class="card-meta">
+          <div class="card-title">Ejercicios de Práctica</div>
+          <div class="card-subtitle">Actividades diferenciadas por nivel</div>
+        </div>
+        <span class="cat-tag cat-ejercicios">Ejercicios</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="e1-mat" placeholder="Matemáticas" oninput="updatePreview('e1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tema</label>
+            <input class="field-input" id="e1-tema" placeholder="Fracciones" oninput="updatePreview('e1')">
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Nivel / Curso</label>
+            <input class="field-input" id="e1-nivel" placeholder="5.º primaria" oninput="updatePreview('e1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nº de ejercicios</label>
+            <input class="field-input" id="e1-num" placeholder="10" type="number" oninput="updatePreview('e1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Nivel de dificultad</label>
+          <select class="field-select" id="e1-dif" onchange="updatePreview('e1')">
+            <option value="">Seleccionar…</option>
+            <option>Básico</option>
+            <option>Intermedio</option>
+            <option>Avanzado</option>
+            <option>Los tres niveles (diferenciado)</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="e1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('e1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('e1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 2. EJERCICIOS — Resolución de problemas        -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="ejercicios">
+      <div class="card-header">
+        <span class="card-emoji">🧩</span>
+        <div class="card-meta">
+          <div class="card-title">Problemas Contextualizados</div>
+          <div class="card-subtitle">Ejercicios con contexto real</div>
+        </div>
+        <span class="cat-tag cat-ejercicios">Ejercicios</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="e2-mat" placeholder="Ciencias Naturales" oninput="updatePreview('e2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tema</label>
+            <input class="field-input" id="e2-tema" placeholder="Ecosistemas" oninput="updatePreview('e2')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contexto o situación real</label>
+          <input class="field-input" id="e2-ctx" placeholder="Ej. la selva amazónica" oninput="updatePreview('e2')">
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="e2-nivel" placeholder="2.º ESO" oninput="updatePreview('e2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nº de problemas</label>
+            <input class="field-input" id="e2-num" placeholder="5" type="number" oninput="updatePreview('e2')">
+          </div>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="e2-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('e2', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('e2')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 3. EVALUACIÓN — Rúbrica                        -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="evaluacion">
+      <div class="card-header">
+        <span class="card-emoji">📊</span>
+        <div class="card-meta">
+          <div class="card-title">Diseño de Rúbrica</div>
+          <div class="card-subtitle">Criterios de evaluación detallados</div>
+        </div>
+        <span class="cat-tag cat-evaluacion">Evaluación</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label class="field-label">Tarea o producto a evaluar</label>
+          <input class="field-input" id="ev1-tarea" placeholder="Trabajo escrito sobre la Revolución Francesa" oninput="updatePreview('ev1')">
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="ev1-nivel" placeholder="4.º ESO" oninput="updatePreview('ev1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nº de criterios</label>
+            <input class="field-input" id="ev1-crit" placeholder="5" type="number" oninput="updatePreview('ev1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Escala de calificación</label>
+          <select class="field-select" id="ev1-esc" onchange="updatePreview('ev1')">
+            <option value="">Seleccionar…</option>
+            <option>1-4 (Insuficiente, Suficiente, Notable, Excelente)</option>
+            <option>1-10 numérica</option>
+            <option>Logrado / En proceso / No logrado</option>
+            <option>Principiante, Aprendiz, Experto, Maestro</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="ev1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('ev1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('ev1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 4. PLANIFICACIÓN — Secuencia didáctica         -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="planificacion">
+      <div class="card-header">
+        <span class="card-emoji">🗓️</span>
+        <div class="card-meta">
+          <div class="card-title">Secuencia Didáctica</div>
+          <div class="card-subtitle">Planificación de unidad completa</div>
+        </div>
+        <span class="cat-tag cat-planificacion">Planificación</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="pl1-mat" placeholder="Lengua y Literatura" oninput="updatePreview('pl1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Unidad temática</label>
+            <input class="field-input" id="pl1-unidad" placeholder="El texto narrativo" oninput="updatePreview('pl1')">
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="pl1-nivel" placeholder="6.º primaria" oninput="updatePreview('pl1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Duración (sesiones)</label>
+            <input class="field-input" id="pl1-ses" placeholder="6 sesiones" oninput="updatePreview('pl1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Objetivo principal de aprendizaje</label>
+          <input class="field-input" id="pl1-obj" placeholder="Identificar elementos narrativos y escribir un cuento" oninput="updatePreview('pl1')">
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="pl1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('pl1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('pl1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 5. COMUNICACIÓN — Email a familias             -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="comunicacion">
+      <div class="card-header">
+        <span class="card-emoji">📧</span>
+        <div class="card-meta">
+          <div class="card-title">Comunicación con Familias</div>
+          <div class="card-subtitle">Carta o email formal / informativo</div>
+        </div>
+        <span class="cat-tag cat-comunicacion">Comunicación</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label class="field-label">Asunto o motivo</label>
+          <input class="field-input" id="co1-asunto" placeholder="Reunión de seguimiento trimestral" oninput="updatePreview('co1')">
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Tono</label>
+            <select class="field-select" id="co1-tono" onchange="updatePreview('co1')">
+              <option value="">Seleccionar…</option>
+              <option>Formal y profesional</option>
+              <option>Cercano y empático</option>
+              <option>Informativo y neutro</option>
+              <option>Motivador y positivo</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="co1-nivel" placeholder="3.º primaria" oninput="updatePreview('co1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Puntos clave a incluir</label>
+          <textarea class="field-textarea" id="co1-puntos" placeholder="Fecha de reunión, temas a tratar, materiales que traer…" oninput="updatePreview('co1')"></textarea>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="co1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('co1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('co1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 6. INTERACTIVO — Debate guiado                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="interactivo">
+      <div class="card-header">
+        <span class="card-emoji">💬</span>
+        <div class="card-meta">
+          <div class="card-title">Actividad de Debate</div>
+          <div class="card-subtitle">Preguntas y argumentos para debate en clase</div>
+        </div>
+        <span class="cat-tag cat-interactivo">Interactivo</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label class="field-label">Tema de debate</label>
+          <input class="field-input" id="in1-tema" placeholder="¿Deben prohibirse los móviles en las escuelas?" oninput="updatePreview('in1')">
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia relacionada</label>
+            <input class="field-input" id="in1-mat" placeholder="Valores Cívicos" oninput="updatePreview('in1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="in1-nivel" placeholder="1.º Bachillerato" oninput="updatePreview('in1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Duración estimada del debate</label>
+          <select class="field-select" id="in1-dur" onchange="updatePreview('in1')">
+            <option value="">Seleccionar…</option>
+            <option>15 minutos</option>
+            <option>30 minutos</option>
+            <option>45 minutos (sesión completa)</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="in1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('in1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('in1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 7. NEE — Adaptación curricular                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="nee">
+      <div class="card-header">
+        <span class="card-emoji">🌱</span>
+        <div class="card-meta">
+          <div class="card-title">Adaptación Curricular (ACI)</div>
+          <div class="card-subtitle">Materiales accesibles para NEE</div>
+        </div>
+        <span class="cat-tag cat-nee">NEE</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="nee1-mat" placeholder="Historia" oninput="updatePreview('nee1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tema</label>
+            <input class="field-input" id="nee1-tema" placeholder="La Segunda Guerra Mundial" oninput="updatePreview('nee1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Necesidad educativa específica</label>
+          <select class="field-select" id="nee1-nee" onchange="updatePreview('nee1')">
+            <option value="">Seleccionar…</option>
+            <option>Dislexia</option>
+            <option>TDAH</option>
+            <option>TEA (Trastorno del Espectro Autista)</option>
+            <option>Discapacidad intelectual leve</option>
+            <option>Baja visión</option>
+            <option>Altas capacidades (enriquecimiento)</option>
+          </select>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="nee1-nivel" placeholder="3.º ESO" oninput="updatePreview('nee1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tipo de material</label>
+            <select class="field-select" id="nee1-tipo" onchange="updatePreview('nee1')">
+              <option value="">Seleccionar…</option>
+              <option>Ficha de trabajo adaptada</option>
+              <option>Lectura simplificada</option>
+              <option>Instrucciones paso a paso</option>
+              <option>Actividad visual / pictogramas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="nee1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('nee1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('nee1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 8. COMENTARIOS — Boletín de notas              -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="comentarios">
+      <div class="card-header">
+        <span class="card-emoji">📝</span>
+        <div class="card-meta">
+          <div class="card-title">Comentarios para Boletín</div>
+          <div class="card-subtitle">Redacción personalizada de informes</div>
+        </div>
+        <span class="cat-tag cat-comentarios">Comentarios</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Nombre del alumno/a</label>
+            <input class="field-input" id="cm1-alumno" placeholder="Lucía" oninput="updatePreview('cm1')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="cm1-mat" placeholder="Inglés" oninput="updatePreview('cm1')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Puntos fuertes</label>
+          <textarea class="field-textarea" id="cm1-bien" placeholder="Buena comprensión oral, participación activa, creatividad…" oninput="updatePreview('cm1')"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Áreas de mejora</label>
+          <textarea class="field-textarea" id="cm1-mejora" placeholder="Expresión escrita, gramática, presentación de trabajos…" oninput="updatePreview('cm1')"></textarea>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Tono del comentario</label>
+            <select class="field-select" id="cm1-tono" onchange="updatePreview('cm1')">
+              <option value="">Seleccionar…</option>
+              <option>Positivo y motivador</option>
+              <option>Neutro e informativo</option>
+              <option>Constructivo con retos</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Extensión</label>
+            <select class="field-select" id="cm1-ext" onchange="updatePreview('cm1')">
+              <option value="">Seleccionar…</option>
+              <option>Breve (2-3 frases)</option>
+              <option>Media (1 párrafo)</option>
+              <option>Detallada (2 párrafos)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="cm1-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('cm1', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('cm1')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 9. PLANIFICACIÓN — Proyecto interdisciplinar   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="planificacion">
+      <div class="card-header">
+        <span class="card-emoji">🔗</span>
+        <div class="card-meta">
+          <div class="card-title">Proyecto Interdisciplinar (ABP)</div>
+          <div class="card-subtitle">Aprendizaje Basado en Proyectos</div>
+        </div>
+        <span class="cat-tag cat-planificacion">Planificación</span>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label class="field-label">Pregunta guía del proyecto</label>
+          <input class="field-input" id="pl2-preg" placeholder="¿Cómo afecta el cambio climático a nuestra ciudad?" oninput="updatePreview('pl2')">
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materias implicadas</label>
+            <input class="field-input" id="pl2-mats" placeholder="Geografía, Ciencias, Matemáticas" oninput="updatePreview('pl2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="pl2-nivel" placeholder="3.º ESO" oninput="updatePreview('pl2')">
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Duración</label>
+            <input class="field-input" id="pl2-dur" placeholder="4 semanas" oninput="updatePreview('pl2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Producto final</label>
+            <input class="field-input" id="pl2-prod" placeholder="Presentación + informe" oninput="updatePreview('pl2')">
+          </div>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="pl2-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('pl2', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('pl2')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 10. INTERACTIVO — Quiz de repaso               -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="interactivo">
+      <div class="card-header">
+        <span class="card-emoji">🎯</span>
+        <div class="card-meta">
+          <div class="card-title">Quiz de Repaso</div>
+          <div class="card-subtitle">Preguntas tipo test para repasar</div>
+        </div>
+        <span class="cat-tag cat-interactivo">Interactivo</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="in2-mat" placeholder="Biología" oninput="updatePreview('in2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tema</label>
+            <input class="field-input" id="in2-tema" placeholder="La célula" oninput="updatePreview('in2')">
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Nº de preguntas</label>
+            <input class="field-input" id="in2-num" placeholder="10" type="number" oninput="updatePreview('in2')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="in2-nivel" placeholder="1.º Bachillerato" oninput="updatePreview('in2')">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Formato de pregunta</label>
+          <select class="field-select" id="in2-fmt" onchange="updatePreview('in2')">
+            <option value="">Seleccionar…</option>
+            <option>Opción múltiple (4 opciones, 1 correcta)</option>
+            <option>Verdadero / Falso con justificación</option>
+            <option>Completar el enunciado</option>
+            <option>Respuesta corta</option>
+            <option>Combinado (varios formatos)</option>
+          </select>
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="in2-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('in2', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('in2')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 11. INTERACTIVO — Gamificación / Escape Room   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="card" data-cat="interactivo">
+      <div class="card-header">
+        <span class="card-emoji">🔐</span>
+        <div class="card-meta">
+          <div class="card-title">Gamificación / Escape Room</div>
+          <div class="card-subtitle">Actividad lúdica con retos y recompensas</div>
+        </div>
+        <span class="cat-tag cat-interactivo">Interactivo</span>
+      </div>
+      <div class="card-body">
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Materia</label>
+            <input class="field-input" id="in3-mat" placeholder="Historia" oninput="updatePreview('in3')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tema / Contenido</label>
+            <input class="field-input" id="in3-tema" placeholder="La Antigua Roma" oninput="updatePreview('in3')">
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Curso</label>
+            <input class="field-input" id="in3-nivel" placeholder="2.º ESO" oninput="updatePreview('in3')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Formato</label>
+            <select class="field-select" id="in3-fmt" onchange="updatePreview('in3')">
+              <option value="">Seleccionar…</option>
+              <option>Escape Room (retos con candados)</option>
+              <option>Gamificación por puntos y niveles</option>
+              <option>Misión narrativa con decisiones</option>
+              <option>Trivial / Quiz competitivo por equipos</option>
+              <option>Breakout educativo digital</option>
+            </select>
+          </div>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Nº de retos / pruebas</label>
+            <input class="field-input" id="in3-retos" placeholder="5" type="number" oninput="updatePreview('in3')">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Duración</label>
+            <select class="field-select" id="in3-dur" onchange="updatePreview('in3')">
+              <option value="">Seleccionar…</option>
+              <option>20 minutos</option>
+              <option>30 minutos</option>
+              <option>45 minutos (sesión completa)</option>
+              <option>2 sesiones</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Narrativa o ambientación (opcional)</label>
+          <input class="field-input" id="in3-narrativa" placeholder="Ej. Los alumnos son detectives en Roma, año 44 a.C." oninput="updatePreview('in3')">
+        </div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-label">Vista previa del prompt</div>
+        <div class="preview-text" id="in3-preview">Rellena los campos para ver el prompt generado.</div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-copy" onclick="copyPrompt('in3', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="btn btn-send" onclick="sendToClaude('in3')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar a Claude
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /cards-grid -->
+</div><!-- /main -->
+
+<script>
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+
+// Returns the raw value from a field (empty string if not filled)
+function val(id) {
+  const el = document.getElementById(id);
+  if (!el) return '';
+  return el.value.trim();
+}
+
+// Returns true if field has a value
+function filled(id) { return val(id).length > 0; }
+
+// Builds an HTML span for the preview: green if filled, orange placeholder if not
+function token(id, label) {
+  if (filled(id)) {
+    return `<span class="tok-filled">${escHtml(val(id))}</span>`;
+  }
+  return `<span class="tok-empty">▸ ${label}</span>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Plain text version (for copy/send) — uses actual value or readable placeholder
+function plain(id, label) {
+  return filled(id) ? val(id) : `[${label}]`;
+}
+
+// ─────────────────────────────────────────────
+//  PREVIEW BUILDERS  (return HTML strings)
+// ─────────────────────────────────────────────
+const previews = {
+  e1: () => `Crea ${token('e1-num','número de ejercicios')} ejercicios de práctica sobre "${token('e1-tema','tema')}" para la asignatura de ${token('e1-mat','materia')}, dirigidos a alumnos de ${token('e1-nivel','curso')}. El nivel de dificultad debe ser: ${token('e1-dif','dificultad')}. Para cada ejercicio incluye: enunciado claro, espacio para la resolución y la solución comentada al final. Los ejercicios deben avanzar progresivamente en complejidad y ser adecuados para trabajar de forma autónoma en clase o como tarea.`,
+
+  e2: () => `Diseña ${token('e2-num','número de problemas')} problemas contextualizados sobre "${token('e2-tema','tema')}" para ${token('e2-mat','materia')} en ${token('e2-nivel','curso')}. Todos los problemas deben estar ambientados en el contexto de "${token('e2-ctx','contexto o situación real')}" para hacer el aprendizaje significativo y conectado con la realidad. Cada problema debe incluir: situación real detallada, pregunta(s) a resolver, datos necesarios y solución razonada paso a paso.`,
+
+  ev1: () => `Crea una rúbrica de evaluación para la siguiente tarea: "${token('ev1-tarea','tarea a evaluar')}", destinada a alumnos de ${token('ev1-nivel','curso')}. La rúbrica debe incluir ${token('ev1-crit','número de criterios')} criterios de evaluación relevantes. Utiliza la siguiente escala de calificación: ${token('ev1-esc','escala')}. Para cada criterio y nivel, describe de forma clara y objetiva qué debe demostrar el alumno. Presenta el resultado en formato de tabla.`,
+
+  pl1: () => `Diseña una secuencia didáctica completa para la unidad "${token('pl1-unidad','unidad temática')}" de ${token('pl1-mat','materia')}, dirigida a ${token('pl1-nivel','curso')}. La secuencia debe abarcar ${token('pl1-ses','número de sesiones')} y tener como objetivo principal: "${token('pl1-obj','objetivo de aprendizaje')}". Incluye para cada sesión: título, objetivos específicos, actividades de inicio/desarrollo/cierre, recursos necesarios, agrupamientos y criterios de evaluación. Aplica metodologías activas.`,
+
+  co1: () => `Redacta una comunicación para las familias del alumnado de ${token('co1-nivel','curso')} sobre el siguiente asunto: "${token('co1-asunto','asunto o motivo')}". El tono debe ser ${token('co1-tono','tono')}. Asegúrate de incluir los siguientes puntos clave: ${token('co1-puntos','puntos clave')}. La comunicación debe ser clara, directa y accesible para cualquier familia. Incluye una fórmula de saludo y despedida apropiadas. Extensión aproximada: 150-200 palabras.`,
+
+  in1: () => `Prepara una actividad de debate para la clase de ${token('in1-mat','materia')} (${token('in1-nivel','curso')}) sobre el tema: "${token('in1-tema','tema de debate')}". La duración estimada es de ${token('in1-dur','duración')}. Incluye: 5 preguntas detonantes para iniciar el debate, argumentos sólidos para cada postura (a favor y en contra), un protocolo de normas para el debate ordenado, y orientaciones para que el docente modere la actividad.`,
+
+  nee1: () => `Crea ${token('nee1-tipo','tipo de material')} adaptado sobre "${token('nee1-tema','tema')}" para la asignatura de ${token('nee1-mat','materia')} (${token('nee1-nivel','curso')}), específicamente diseñado para un alumno/a con ${token('nee1-nee','necesidad educativa')}. Aplica las estrategias y adaptaciones metodológicas adecuadas: ajusta la longitud de los textos, el vocabulario, el formato visual y la estructura de las actividades. El material debe permitir trabajar con el mayor grado de autonomía posible.`,
+
+  cm1: () => `Redacta un comentario para el boletín de notas de ${token('cm1-alumno','nombre del alumno/a')} en la asignatura de ${token('cm1-mat','materia')}. Puntos fuertes del alumno/a: ${token('cm1-bien','puntos fuertes')}. Áreas de mejora identificadas: ${token('cm1-mejora','áreas de mejora')}. El comentario debe tener un tono ${token('cm1-tono','tono')}, extensión ${token('cm1-ext','extensión')}, y estar redactado en tercera persona de forma personalizada. Evita los comentarios genéricos.`,
+
+  pl2: () => `Diseña un proyecto interdisciplinar ABP para ${token('pl2-nivel','curso')} con una duración de ${token('pl2-dur','duración')}. La pregunta guía del proyecto es: "${token('pl2-preg','pregunta guía')}". Las materias implicadas son: ${token('pl2-mats','materias')}. El producto final será: ${token('pl2-prod','producto final')}. Incluye: fases del proyecto, actividades por fase, conexión con las competencias de cada materia, hitos de seguimiento y criterios de evaluación del producto final y del proceso de trabajo en equipo.`,
+
+  in2: () => `Crea un quiz de repaso de ${token('in2-num','número de preguntas')} preguntas sobre "${token('in2-tema','tema')}" para la asignatura de ${token('in2-mat','materia')}, nivel ${token('in2-nivel','curso')}. Formato de las preguntas: ${token('in2-fmt','formato')}. Las preguntas deben cubrir los conceptos clave del tema con diferente nivel de dificultad (40% básico, 40% intermedio, 20% avanzado). Al final incluye el solucionario completo con la respuesta correcta y una breve justificación para cada pregunta.`,
+
+  in3: () => `Diseña una actividad de ${token('in3-fmt','formato')} sobre "${token('in3-tema','tema')}" para la asignatura de ${token('in3-mat','materia')}, curso ${token('in3-nivel','curso')}. La actividad debe constar de ${token('in3-retos','número de retos')} retos o pruebas y tener una duración de ${token('in3-dur','duración')}${val('in3-narrativa') ? `. La narrativa o ambientación es: "${token('in3-narrativa','narrativa')}"` : ''}. Para cada reto incluye: nombre del reto, descripción de la mecánica, pregunta o desafío vinculado al contenido, pista opcional y recompensa o desbloqueo al superarlo. Añade instrucciones para el docente sobre cómo preparar y gestionar la actividad en el aula.`,
+};
+
+// ─────────────────────────────────────────────
+//  PLAIN TEXT GENERATORS  (for copy / send)
+// ─────────────────────────────────────────────
+const plainPrompts = {
+  e1: () => `Crea ${plain('e1-num','número')} ejercicios de práctica sobre "${plain('e1-tema','tema')}" para la asignatura de ${plain('e1-mat','materia')}, dirigidos a alumnos de ${plain('e1-nivel','curso')}. El nivel de dificultad debe ser: ${plain('e1-dif','dificultad')}. Para cada ejercicio incluye: enunciado claro, espacio para la resolución y la solución comentada al final. Los ejercicios deben avanzar progresivamente en complejidad y ser adecuados para trabajar de forma autónoma en clase o como tarea.`,
+
+  e2: () => `Diseña ${plain('e2-num','número')} problemas contextualizados sobre "${plain('e2-tema','tema')}" para ${plain('e2-mat','materia')} en ${plain('e2-nivel','curso')}. Todos los problemas deben estar ambientados en el contexto de "${plain('e2-ctx','contexto')}" para hacer el aprendizaje significativo y conectado con la realidad. Cada problema debe incluir: situación real detallada, pregunta(s) a resolver, datos necesarios y solución razonada paso a paso.`,
+
+  ev1: () => `Crea una rúbrica de evaluación para la siguiente tarea: "${plain('ev1-tarea','tarea')}", destinada a alumnos de ${plain('ev1-nivel','curso')}. La rúbrica debe incluir ${plain('ev1-crit','número')} criterios de evaluación relevantes. Utiliza la siguiente escala de calificación: ${plain('ev1-esc','escala')}. Para cada criterio y nivel, describe de forma clara y objetiva qué debe demostrar el alumno. Presenta el resultado en formato de tabla.`,
+
+  pl1: () => `Diseña una secuencia didáctica completa para la unidad "${plain('pl1-unidad','unidad')}" de ${plain('pl1-mat','materia')}, dirigida a ${plain('pl1-nivel','curso')}. La secuencia debe abarcar ${plain('pl1-ses','sesiones')} y tener como objetivo principal: "${plain('pl1-obj','objetivo')}". Incluye para cada sesión: título, objetivos específicos, actividades de inicio/desarrollo/cierre, recursos necesarios, agrupamientos y criterios de evaluación. Aplica metodologías activas.`,
+
+  co1: () => `Redacta una comunicación para las familias del alumnado de ${plain('co1-nivel','curso')} sobre el siguiente asunto: "${plain('co1-asunto','asunto')}". El tono debe ser ${plain('co1-tono','tono')}. Asegúrate de incluir los siguientes puntos clave: ${plain('co1-puntos','puntos clave')}. La comunicación debe ser clara, directa y accesible para cualquier familia. Incluye una fórmula de saludo y despedida apropiadas. Extensión aproximada: 150-200 palabras.`,
+
+  in1: () => `Prepara una actividad de debate para la clase de ${plain('in1-mat','materia')} (${plain('in1-nivel','curso')}) sobre el tema: "${plain('in1-tema','tema')}". La duración estimada es de ${plain('in1-dur','duración')}. Incluye: 5 preguntas detonantes para iniciar el debate, argumentos sólidos para cada postura (a favor y en contra), un protocolo de normas para el debate ordenado, y orientaciones para que el docente modere la actividad.`,
+
+  nee1: () => `Crea ${plain('nee1-tipo','tipo de material')} adaptado sobre "${plain('nee1-tema','tema')}" para la asignatura de ${plain('nee1-mat','materia')} (${plain('nee1-nivel','curso')}), específicamente diseñado para un alumno/a con ${plain('nee1-nee','necesidad educativa')}. Aplica las estrategias y adaptaciones metodológicas adecuadas: ajusta la longitud de los textos, el vocabulario, el formato visual y la estructura de las actividades. El material debe permitir trabajar con el mayor grado de autonomía posible.`,
+
+  cm1: () => `Redacta un comentario para el boletín de notas de ${plain('cm1-alumno','nombre')} en la asignatura de ${plain('cm1-mat','materia')}. Puntos fuertes del alumno/a: ${plain('cm1-bien','puntos fuertes')}. Áreas de mejora identificadas: ${plain('cm1-mejora','áreas de mejora')}. El comentario debe tener un tono ${plain('cm1-tono','tono')}, extensión ${plain('cm1-ext','extensión')}, y estar redactado en tercera persona de forma personalizada. Evita los comentarios genéricos.`,
+
+  pl2: () => `Diseña un proyecto interdisciplinar ABP para ${plain('pl2-nivel','curso')} con una duración de ${plain('pl2-dur','duración')}. La pregunta guía del proyecto es: "${plain('pl2-preg','pregunta guía')}". Las materias implicadas son: ${plain('pl2-mats','materias')}. El producto final será: ${plain('pl2-prod','producto final')}. Incluye: fases del proyecto, actividades por fase, conexión con las competencias de cada materia, hitos de seguimiento y criterios de evaluación del producto final y del proceso de trabajo en equipo.`,
+
+  in2: () => `Crea un quiz de repaso de ${plain('in2-num','número')} preguntas sobre "${plain('in2-tema','tema')}" para la asignatura de ${plain('in2-mat','materia')}, nivel ${plain('in2-nivel','curso')}. Formato de las preguntas: ${plain('in2-fmt','formato')}. Las preguntas deben cubrir los conceptos clave del tema con diferente nivel de dificultad (40% básico, 40% intermedio, 20% avanzado). Al final incluye el solucionario completo con la respuesta correcta y una breve justificación para cada pregunta.`,
+
+  in3: () => `Diseña una actividad de ${plain('in3-fmt','formato')} sobre "${plain('in3-tema','tema')}" para la asignatura de ${plain('in3-mat','materia')}, curso ${plain('in3-nivel','curso')}. La actividad debe constar de ${plain('in3-retos','número de retos')} retos o pruebas y tener una duración de ${plain('in3-dur','duración')}${val('in3-narrativa') ? `. La narrativa o ambientación es: "${val('in3-narrativa')}"` : ''}. Para cada reto incluye: nombre del reto, descripción de la mecánica, pregunta o desafío vinculado al contenido, pista opcional y recompensa o desbloqueo al superarlo. Añade instrucciones para el docente sobre cómo preparar y gestionar la actividad en el aula.`,
+};
+
+// ─────────────────────────────────────────────
+//  UPDATE PREVIEW
+// ─────────────────────────────────────────────
+function updatePreview(id) {
+  const preview = document.getElementById(id + '-preview');
+  if (!preview || !previews[id]) return;
+  preview.innerHTML = previews[id]();
+}
+
+// ─────────────────────────────────────────────
+//  COPY PROMPT
+// ─────────────────────────────────────────────
+function copyPrompt(id, btn) {
+  const gen = plainPrompts[id];
+  if (!gen) return;
+  const text = gen();
+  const orig = btn.innerHTML;
+  const doCopied = () => {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ¡Copiado!`;
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(doCopied).catch(() => fallbackCopy(text, doCopied));
+  } else {
+    fallbackCopy(text, doCopied);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+// ─────────────────────────────────────────────
+//  SEND TO CLAUDE
+// ─────────────────────────────────────────────
+function sendToClaude(id) {
+  const gen = plainPrompts[id];
+  if (!gen) return;
+  const text = gen();
+  const url = 'https://claude.ai/new?q=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+// ─────────────────────────────────────────────
+//  FILTER LOGIC
+// ─────────────────────────────────────────────
+function filterCards(cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  document.querySelectorAll('.card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+// Init all previews
+Object.keys(previews).forEach(id => updatePreview(id));
+</script>
+</body>
+</html>

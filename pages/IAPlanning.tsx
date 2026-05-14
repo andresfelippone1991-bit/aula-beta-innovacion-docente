@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../src/context/AuthContext';
 
 const PROMPTS = [
     {
@@ -41,11 +43,20 @@ const ASSISTANTS = [
         description: 'Genera rutinas y actividades basadas en el Proyecto Zero de Harvard para profundizar la comprensión de tus estudiantes.',
         icon: 'visibility',
         url: 'https://rutinasdepensamiento.netlify.app/'
+    },
+    {
+        title: 'Generador de Prompts',
+        description: 'Plantillas personalizables para crear prompts efectivos y enviarlos directamente a Claude. Evaluación, planificación, actividades y más.',
+        icon: 'smart_toy',
+        url: '/tools/generador-prompts.html',
+        requiresAuth: true
     }
 ];
 
 export const IAPlanning: React.FC = () => {
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text);
@@ -141,14 +152,26 @@ export const IAPlanning: React.FC = () => {
                                 </p>
 
                                 <div className="mt-auto">
-                                    <a
-                                        href={item.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        onClick={(e) => {
+                                            if (item.requiresAuth && !user) {
+                                                e.preventDefault();
+                                                navigate('/login');
+                                            } else {
+                                                window.open(item.url, '_blank', 'noopener,noreferrer');
+                                            }
+                                        }}
                                         className="inline-block bg-[#0f172a] hover:bg-[#1e293b] text-white px-8 py-4 rounded-full font-bold text-sm tracking-wide transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                                     >
-                                        ABRIR ASISTENTE
-                                    </a>
+                                        {item.requiresAuth && !user ? (
+                                            <span className="flex items-center gap-2">
+                                                <span className="material-icons-round text-sm">lock</span>
+                                                REQUIERE LOGIN
+                                            </span>
+                                        ) : (
+                                            'ABRIR ASISTENTE'
+                                        )}
+                                    </button>
                                 </div>
                             </div>
                         ))}
