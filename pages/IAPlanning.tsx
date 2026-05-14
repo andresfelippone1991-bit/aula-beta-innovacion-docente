@@ -49,7 +49,8 @@ const ASSISTANTS = [
         description: 'Plantillas personalizables para crear prompts efectivos y enviarlos directamente a Claude. Evaluación, planificación, actividades y más.',
         icon: 'smart_toy',
         url: '/tools/generador-prompts.html',
-        requiresAuth: true
+        requiresAuth: true,
+        image: '/images/generador-prompts-thumb.png'
     }
 ];
 
@@ -136,11 +137,15 @@ export const IAPlanning: React.FC = () => {
                     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
                         {ASSISTANTS.map((item, idx) => (
                             <div key={idx} className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-center text-center h-full">
-                                {/* Icon */}
-                                <div className="mb-8">
-                                    <div className="w-24 h-24 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-                                        <span className="material-icons-round text-5xl text-[#2563eb]">{item.icon}</span>
-                                    </div>
+                                {/* Icon or Image */}
+                                <div className="mb-8 w-full flex justify-center">
+                                    {item.image ? (
+                                        <img src={item.image} alt={item.title} className="w-full h-auto object-cover rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 transition-transform hover:scale-[1.02]" />
+                                    ) : (
+                                        <div className="w-24 h-24 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                            <span className="material-icons-round text-5xl text-[#2563eb]">{item.icon}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <h3 className="text-2xl font-bold text-[#2563eb] mb-6">
